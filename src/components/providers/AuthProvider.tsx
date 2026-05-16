@@ -20,6 +20,7 @@ export interface User {
   provider?: 'local' | 'google'
   createdAt?: string
   createdTime?: string
+  picture?: string
 }
 
 type AuthCtx = {

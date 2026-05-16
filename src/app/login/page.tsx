@@ -46,8 +46,6 @@ function LoginPageInner() {
     if (code) {
       setToastOk(true)
       setToast('Login bem sucedido!')
-      // Armazenar código no localStorage para usar depois
-      localStorage.setItem('googleAuthCode', code)
       
       console.log('[Login] Processing Google callback with code:', code)
       
@@ -64,28 +62,32 @@ function LoginPageInner() {
           console.log('[Login] Backend response data:', data)
           
           if (res.ok && data.success && data.user) {
-            console.log('[Login] Login successful, redirecting to dashboard')
-            // Salvar dados do usuário no localStorage
+            console.log('[Login] Login successful, storing user data')
+            // Salvar dados do usuário no localStorage para o dashboard usar
             localStorage.setItem('googleUser', JSON.stringify(data.user))
-            // Redirecionar para dashboard após 500ms usando window.location
-            setTimeout(() => {
-              console.log('[Login] Redirecting to /dashboard')
-              window.location.href = '/dashboard'
-            }, 500)
+            
+            // Limpar a URL antes de redirecionar
+            window.history.replaceState({}, document.title, '/login')
+            
+            // Redirecionar para dashboard usando router.replace para evitar histórico
+            console.log('[Login] Redirecting to /dashboard')
+            router.replace('/dashboard')
           } else {
             console.error('[Login] Backend error:', data.error)
             setToastOk(false)
             setToast(`Erro: ${data.error || 'Falha ao processar login'}`)
+            // Limpar a URL mesmo em caso de erro
+            window.history.replaceState({}, document.title, '/login')
           }
         })
         .catch(err => {
           console.error('[Login] Fetch error:', err)
           setToastOk(false)
           setToast('Erro ao processar login. Tente novamente.')
+          // Limpar a URL mesmo em caso de erro
+          window.history.replaceState({}, document.title, '/login')
         })
       
-      // Limpar a URL
-      window.history.replaceState({}, document.title, '/login')
       return
     }
     

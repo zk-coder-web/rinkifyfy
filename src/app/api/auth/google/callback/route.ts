@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
       id: userData.id,
       email: userData.email,
       name: userData.name,
+      picture: userData.picture,
     })).toString('base64');
     
     response.cookies.set('rankify_session', sessionToken, {

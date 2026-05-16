@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
         email: user.email,
         name: user.name || '',
         displayName: user.name || user.display_name || '',
+        picture: user.picture,
         provider: user.provider,
         verified: user.verified === 1,
       }

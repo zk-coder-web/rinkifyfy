@@ -167,19 +167,7 @@ export default function DashboardPage() {
 
   // Busca o nome diretamente da API para garantir dados atualizados
   const fetchUserName = () => {
-    // Primeiro tenta buscar do localStorage (Google OAuth)
-    const googleUser = localStorage.getItem('googleUser')
-    if (googleUser) {
-      try {
-        const userData = JSON.parse(googleUser)
-        setDisplayName(userData.name || '')
-        return
-      } catch (e) {
-        console.error('Erro ao parsear googleUser:', e)
-      }
-    }
-
-    // Se não tiver no localStorage, busca da API
+    // Busca da API (funciona para Google OAuth e usuários normais)
     fetch('/api/auth/user', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -187,9 +175,23 @@ export default function DashboardPage() {
         if (data.user) {
           const name = data.user.name || data.user.displayName || ''
           setDisplayName(name)
+          // Atualiza localStorage com dados completos incluindo foto
+          localStorage.setItem('googleUser', JSON.stringify(data.user))
         }
       })
-      .catch(() => {})
+      .catch(err => {
+        console.error('[Dashboard] Erro ao buscar dados:', err)
+        // Fallback para localStorage se API falhar
+        const googleUser = localStorage.getItem('googleUser')
+        if (googleUser) {
+          try {
+            const userData = JSON.parse(googleUser)
+            setDisplayName(userData.name || '')
+          } catch (e) {
+            console.error('Erro ao parsear googleUser:', e)
+          }
+        }
+      })
   }
 
   // Busca ao montar apenas uma vez
