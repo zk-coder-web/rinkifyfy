@@ -60,6 +60,7 @@ function LoginPageInner() {
           console.log('[Login] Backend response status:', res.status)
           const data = await res.json()
           console.log('[Login] Backend response data:', data)
+          console.log('[Login] Response cookies:', res.headers.get('set-cookie'))
           
           if (res.ok && data.success && data.user) {
             console.log('[Login] Login successful, storing user data')

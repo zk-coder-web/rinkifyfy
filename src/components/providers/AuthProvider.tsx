@@ -151,7 +151,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       clearTimeout(timer)
 
+      console.log('[AuthProvider] fetchSession response status:', res.status)
+
       if (!res.ok) { 
+        console.log('[AuthProvider] Session check failed with status:', res.status)
         // Se sessão expirou, tenta refresh automático
         if (res.status === 401) {
           const refreshed = await tryRefreshSession()
@@ -168,13 +171,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await res.json() as { user: User | null }
-      console.log('[Auth] fetchSession result:', data.user)
-      console.log('[Auth] user.name:', data.user?.name, 'user.displayName:', data.user?.displayName)
+      console.log('[AuthProvider] fetchSession result:', data.user)
       if (data.user) {
-        console.log('[Auth] Setting user with name:', data.user.name)
+        console.log('[AuthProvider] User found:', { id: data.user.id, email: data.user.email, provider: data.user.provider })
+      } else {
+        console.log('[AuthProvider] No user in response')
       }
       setUser(data.user ?? null)
-    } catch {
+    } catch (e) {
+      console.error('[AuthProvider] fetchSession error:', e)
       // Network error or timeout — keep existing state, don't log out
       // Only clear user if we've never loaded (booting)
       if (booting) setUser(null)
