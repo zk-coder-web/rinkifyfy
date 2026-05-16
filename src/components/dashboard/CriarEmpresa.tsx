@@ -87,10 +87,10 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
     setInstagramVerification(null)
 
     try {
-      const response = await fetch('/api/instagram/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
+      // Chamar direto o servidor do Render em vez do Vercel
+      const response = await fetch('https://verifyig.onrender.com/check/' + username, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
       })
 
       if (!response.ok) {
@@ -102,11 +102,11 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
 
       const data = await response.json()
 
-      if (data.success && data.data) {
+      if (data.success && data.exists) {
         setInstagramVerification({
-          nome: data.data.nome,
-          seguidores: data.data.seguidores,
-          username: data.data.username,
+          nome: data.nome || username,
+          seguidores: data.seguidores || 0,
+          username: data.username || username,
         })
         setInstagramError('')
       } else {

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: instagram-checker-api
+    runtime: node
+    buildCommand: cd verificarUser && npm install
+    startCommand: cd verificarUser && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
