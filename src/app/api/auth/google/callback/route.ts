@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { upsertGoogleUser, createSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,25 +61,26 @@ export async function POST(req: NextRequest) {
 
     const userData = await userResponse.json();
 
-    // Criar ou atualizar usuário no banco
-    const user = upsertGoogleUser(userData.id, userData.email, userData.name);
-
-    // Criar sessão no banco
-    const sessionToken = createSession(user.id);
-
-    // Criar resposta com cookie de sessão
+    // Criar resposta com dados do usuário
     const response = NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name || user.display_name,
-        displayName: user.display_name,
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        displayName: userData.name,
         picture: userData.picture,
         provider: 'google',
       },
     });
 
+    // Criar um token de sessão simples (base64 dos dados do usuário)
+    const sessionToken = Buffer.from(JSON.stringify({
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+    })).toString('base64');
+    
     response.cookies.set('rankify_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Erro:', error);
+    console.error('Erro no callback:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
