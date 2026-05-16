@@ -61,15 +61,34 @@ export async function POST(req: NextRequest) {
 
     const userData = await userResponse.json();
 
-    return NextResponse.json({
+    // Criar sessão do usuário
+    const user = {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      displayName: userData.name,
+      picture: userData.picture,
+      provider: 'google' as const,
+    };
+
+    // Criar resposta com cookie de sessão
+    const response = NextResponse.json({
       success: true,
-      user: {
-        id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        picture: userData.picture,
-      },
+      user,
     });
+
+    // Criar um token de sessão simples (em produção, usar JWT ou similar)
+    const sessionToken = Buffer.from(JSON.stringify(user)).toString('base64');
+    
+    response.cookies.set('rankify_session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 dias
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Erro:', error);
     return NextResponse.json(
