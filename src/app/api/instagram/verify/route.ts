@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { execSync } from 'child_process'
-import path from 'path'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,23 +23,60 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Caminho para o script Python
-      const scriptPath = path.join(process.cwd(), 'verificarUser', 'checker.py')
-      
-      // Executar o script Python com encoding UTF-8
-      const result = execSync(`python "${scriptPath}" "${cleanUsername}"`, {
-        encoding: 'utf-8',
-        timeout: 30000,
-        maxBuffer: 10 * 1024 * 1024,
-        env: {
-          ...process.env,
-          PYTHONIOENCODING: 'utf-8',
+      // Tentar verificar o perfil do Instagram usando web scraping
+      const response = await fetch(`https://www.instagram.com/${cleanUsername}/?__a=1&__d=dis`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
         },
+        timeout: 10000,
       })
 
-      const data = JSON.parse(result)
+      if (!response.ok) {
+        // Se a API JSON falhar, tentar com a página HTML
+        const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+          timeout: 10000,
+        })
 
-      if (!data.success || !data.exists) {
+        if (!htmlResponse.ok || htmlResponse.status === 404) {
+          return NextResponse.json(
+            { error: '@ do usuário não encontrado.' },
+            { status: 404 }
+          )
+        }
+
+        const html = await htmlResponse.text()
+        
+        // Procurar por dados no HTML
+        const nameMatch = html.match(/"full_name":"([^"]+)"/)
+        const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
+        
+        if (!nameMatch && !followersMatch) {
+          return NextResponse.json(
+            { error: '@ do usuário não encontrado.' },
+            { status: 404 }
+          )
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            username: cleanUsername,
+            nome: nameMatch ? nameMatch[1] : cleanUsername,
+            seguidores: followersMatch ? parseInt(followersMatch[1]) : 0,
+          },
+        })
+      }
+
+      const data = await response.json()
+
+      // Extrair dados da resposta JSON
+      const user = data.user || data.graphql?.user
+      
+      if (!user) {
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
@@ -51,13 +86,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
-          username: data.username,
-          nome: data.nome || data.username,
-          seguidores: data.seguidores || 0,
+          username: cleanUsername,
+          nome: user.full_name || user.username || cleanUsername,
+          seguidores: user.edge_followed_by?.count || user.follower_count || 0,
         },
       })
-    } catch (pythonError: any) {
-      console.error('Erro ao executar script Python:', pythonError.message)
+    } catch (fetchError: any) {
+      console.error('Erro ao verificar Instagram:', fetchError.message)
+      
+      // Se tudo falhar, retornar erro genérico
       return NextResponse.json(
         { error: '@ do usuário não encontrado.' },
         { status: 404 }
