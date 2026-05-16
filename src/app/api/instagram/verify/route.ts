@@ -24,119 +24,58 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Instagram Verify] Verificando usuário: ${cleanUsername}`)
 
+    // URL do servidor externo que roda o checker.py
+    // Você precisa configurar isso com a URL do seu servidor
+    const EXTERNAL_API_URL = process.env.INSTAGRAM_CHECKER_API_URL || 'http://localhost:5000'
+
     try {
-      // Método 1: Tentar com a página HTML diretamente (sem __a=1)
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15000)
+      const timeoutId = setTimeout(() => controller.abort(), 20000)
 
-      try {
-        const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-          },
-          signal: controller.signal,
-        })
+      const response = await fetch(`${EXTERNAL_API_URL}/check/${cleanUsername}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: controller.signal,
+      })
 
-        clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
 
-        console.log(`[Instagram Verify] Response status: ${htmlResponse.status}`)
+      console.log(`[Instagram Verify] Response status: ${response.status}`)
 
-        if (!htmlResponse.ok || htmlResponse.status === 404) {
-          console.log(`[Instagram Verify] Usuário não encontrado (status ${htmlResponse.status})`)
-          return NextResponse.json(
-            { error: '@ do usuário não encontrado.' },
-            { status: 404 }
-          )
-        }
-
-        const html = await htmlResponse.text()
-        
-        // Procurar por dados no HTML usando múltiplos padrões
-        let nome = null
-        let seguidores = 0
-
-        // Padrão 1: full_name em JSON
-        const nameMatch = html.match(/"full_name":"([^"]+)"/)
-        if (nameMatch) {
-          nome = nameMatch[1]
-          console.log(`[Instagram Verify] Nome encontrado (padrão 1): ${nome}`)
-        }
-
-        // Padrão 2: edge_followed_by count
-        const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
-        if (followersMatch) {
-          seguidores = parseInt(followersMatch[1])
-          console.log(`[Instagram Verify] Seguidores encontrados (padrão 2): ${seguidores}`)
-        }
-
-        // Padrão 3: Procurar por "follower_count"
-        if (!followersMatch) {
-          const followerCountMatch = html.match(/"follower_count"\s*:\s*([0-9]+)/)
-          if (followerCountMatch) {
-            seguidores = parseInt(followerCountMatch[1])
-            console.log(`[Instagram Verify] Seguidores encontrados (padrão 3): ${seguidores}`)
-          }
-        }
-
-        // Padrão 4: Procurar por username em og:title
-        if (!nome) {
-          const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/)
-          if (ogTitleMatch) {
-            nome = ogTitleMatch[1]
-            console.log(`[Instagram Verify] Nome encontrado (padrão 4): ${nome}`)
-          }
-        }
-
-        // Se encontrou algo, retornar sucesso
-        if (nome || seguidores > 0) {
-          console.log(`[Instagram Verify] Usuário verificado com sucesso`)
-          return NextResponse.json({
-            success: true,
-            data: {
-              username: cleanUsername,
-              nome: nome || cleanUsername,
-              seguidores: seguidores,
-            },
-          })
-        }
-
-        // Se não encontrou nada, verificar se a página existe
-        if (html.includes('Page Not Found') || html.includes('página não foi encontrada')) {
-          console.log(`[Instagram Verify] Página não encontrada`)
-          return NextResponse.json(
-            { error: '@ do usuário não encontrado.' },
-            { status: 404 }
-          )
-        }
-
-        // Se chegou aqui, a página existe mas não conseguiu extrair dados
-        console.log(`[Instagram Verify] Página existe mas sem dados extraíveis`)
-        // Retornar sucesso mesmo assim, pois a página existe
-        return NextResponse.json({
-          success: true,
-          data: {
-            username: cleanUsername,
-            nome: cleanUsername,
-            seguidores: 0,
-          },
-        })
-      } catch (fetchError: any) {
-        clearTimeout(timeoutId)
-        console.error(`[Instagram Verify] Erro ao fazer fetch: ${fetchError.message}`)
-        
+      if (!response.ok) {
+        console.log(`[Instagram Verify] Erro na resposta (status ${response.status})`)
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
         )
       }
-    } catch (error: any) {
-      console.error(`[Instagram Verify] Erro geral: ${error.message}`)
+
+      const data = await response.json()
+
+      console.log(`[Instagram Verify] Resposta do servidor:`, data)
+
+      if (!data.success || !data.exists) {
+        console.log(`[Instagram Verify] Usuário não encontrado`)
+        return NextResponse.json(
+          { error: '@ do usuário não encontrado.' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          username: cleanUsername,
+          nome: data.nome || data.username || cleanUsername,
+          seguidores: data.seguidores || 0,
+        },
+      })
+    } catch (fetchError: any) {
+      console.error(`[Instagram Verify] Erro ao chamar servidor externo: ${fetchError.message}`)
       
+      // Se o servidor externo não está disponível, retornar erro
       return NextResponse.json(
         { error: '@ do usuário não encontrado.' },
         { status: 404 }
