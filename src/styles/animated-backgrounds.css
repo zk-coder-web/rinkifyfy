@@ -1,0 +1,549 @@
+/* ============================================
+   ANIMATED BACKGROUNDS
+   Fundos animados premium e modernos
+   ============================================ */
+
+/* ============================================
+   BACKGROUND BASE
+   ============================================ */
+
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+  background: var(--bg-primary);
+}
+
+/* ============================================
+   MESH GRADIENT ANIMADO
+   ============================================ */
+
+.bg-mesh-gradient {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-mesh);
+  opacity: 0.6;
+  animation: gradient 15s ease infinite;
+}
+
+/* ============================================
+   ANIMATED BLOBS
+   ============================================ */
+
+.bg-blobs {
+  position: absolute;
+  inset: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  animation: blob 20s ease-in-out infinite;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--accent-primary);
+  top: -10%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--accent-secondary);
+  top: 40%;
+  right: -5%;
+  animation-delay: 4s;
+  animation-duration: 25s;
+}
+
+.blob-3 {
+  width: 450px;
+  height: 450px;
+  background: var(--accent-tertiary);
+  bottom: -10%;
+  left: 30%;
+  animation-delay: 8s;
+  animation-duration: 30s;
+}
+
+.blob-4 {
+  width: 350px;
+  height: 350px;
+  background: var(--glow-primary);
+  top: 20%;
+  left: 50%;
+  animation-delay: 12s;
+  animation-duration: 22s;
+}
+
+/* ============================================
+   AURORA EFFECT
+   ============================================ */
+
+.bg-aurora {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    var(--accent-primary) 25%,
+    var(--accent-secondary) 50%,
+    var(--accent-tertiary) 75%,
+    transparent 100%
+  );
+  opacity: 0.1;
+  filter: blur(80px);
+  animation: aurora 20s ease-in-out infinite;
+}
+
+@keyframes aurora {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.1;
+  }
+  25% {
+    transform: translateY(-20%) rotate(5deg);
+    opacity: 0.15;
+  }
+  50% {
+    transform: translateY(-10%) rotate(-5deg);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translateY(-30%) rotate(3deg);
+    opacity: 0.15;
+  }
+}
+
+/* ============================================
+   PARTICLES EFFECT
+   ============================================ */
+
+.bg-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float-particle 15s ease-in-out infinite;
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(100px, -100vh);
+    opacity: 0;
+  }
+}
+
+/* Gerar partículas com diferentes delays */
+.particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { left: 20%; animation-delay: 2s; animation-duration: 18s; }
+.particle:nth-child(3) { left: 30%; animation-delay: 4s; animation-duration: 20s; }
+.particle:nth-child(4) { left: 40%; animation-delay: 1s; animation-duration: 16s; }
+.particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 22s; }
+.particle:nth-child(6) { left: 60%; animation-delay: 5s; animation-duration: 19s; }
+.particle:nth-child(7) { left: 70%; animation-delay: 2.5s; animation-duration: 17s; }
+.particle:nth-child(8) { left: 80%; animation-delay: 4.5s; animation-duration: 21s; }
+.particle:nth-child(9) { left: 90%; animation-delay: 1.5s; animation-duration: 15s; }
+.particle:nth-child(10) { left: 15%; animation-delay: 3.5s; animation-duration: 23s; }
+
+/* ============================================
+   GRID PATTERN
+   ============================================ */
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--border-secondary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-secondary) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.3;
+  mask-image: radial-gradient(
+    ellipse 80% 50% at 50% 50%,
+    black 0%,
+    transparent 100%
+  );
+}
+
+/* ============================================
+   DOTS PATTERN
+   ============================================ */
+
+.bg-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    var(--border-primary) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+  opacity: 0.4;
+  mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    black 0%,
+    transparent 100%
+  );
+}
+
+/* ============================================
+   GLOW ORBS
+   ============================================ */
+
+.bg-glow-orbs {
+  position: absolute;
+  inset: 0;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: float 20s ease-in-out infinite;
+}
+
+.glow-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--accent-primary);
+  top: -20%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.glow-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: var(--accent-secondary);
+  bottom: -20%;
+  right: -10%;
+  animation-delay: 5s;
+  animation-duration: 25s;
+}
+
+.glow-orb-3 {
+  width: 400px;
+  height: 400px;
+  background: var(--accent-tertiary);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 10s;
+  animation-duration: 30s;
+}
+
+/* ============================================
+   WAVES EFFECT
+   ============================================ */
+
+.bg-waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: var(--accent-primary);
+  opacity: 0.1;
+  animation: wave 15s linear infinite;
+}
+
+.wave:nth-child(2) {
+  background: var(--accent-secondary);
+  opacity: 0.08;
+  animation-delay: -5s;
+  animation-duration: 18s;
+}
+
+.wave:nth-child(3) {
+  background: var(--accent-tertiary);
+  opacity: 0.06;
+  animation-delay: -10s;
+  animation-duration: 20s;
+}
+
+@keyframes wave {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-25%) translateY(-10px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ============================================
+   STARS FIELD
+   ============================================ */
+
+.bg-stars {
+  position: absolute;
+  inset: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* Gerar estrelas com posições aleatórias */
+.star:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.star:nth-child(2) { top: 20%; left: 80%; animation-delay: 0.5s; }
+.star:nth-child(3) { top: 30%; left: 40%; animation-delay: 1s; }
+.star:nth-child(4) { top: 40%; left: 60%; animation-delay: 1.5s; }
+.star:nth-child(5) { top: 50%; left: 10%; animation-delay: 2s; }
+.star:nth-child(6) { top: 60%; left: 90%; animation-delay: 2.5s; }
+.star:nth-child(7) { top: 70%; left: 30%; animation-delay: 0.3s; }
+.star:nth-child(8) { top: 80%; left: 70%; animation-delay: 0.8s; }
+.star:nth-child(9) { top: 15%; left: 50%; animation-delay: 1.3s; }
+.star:nth-child(10) { top: 85%; left: 15%; animation-delay: 1.8s; }
+.star:nth-child(11) { top: 25%; left: 85%; animation-delay: 0.2s; }
+.star:nth-child(12) { top: 45%; left: 25%; animation-delay: 0.7s; }
+.star:nth-child(13) { top: 65%; left: 55%; animation-delay: 1.2s; }
+.star:nth-child(14) { top: 35%; left: 75%; animation-delay: 1.7s; }
+.star:nth-child(15) { top: 55%; left: 35%; animation-delay: 2.2s; }
+.star:nth-child(16) { top: 75%; left: 65%; animation-delay: 0.4s; }
+.star:nth-child(17) { top: 5%; left: 45%; animation-delay: 0.9s; }
+.star:nth-child(18) { top: 95%; left: 55%; animation-delay: 1.4s; }
+.star:nth-child(19) { top: 12%; left: 12%; animation-delay: 1.9s; }
+.star:nth-child(20) { top: 88%; left: 88%; animation-delay: 2.4s; }
+
+/* ============================================
+   NEBULA EFFECT
+   ============================================ */
+
+.bg-nebula {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 30%, var(--accent-primary) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, var(--accent-secondary) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--accent-tertiary) 0%, transparent 50%);
+  opacity: 0.15;
+  filter: blur(100px);
+  animation: nebula 30s ease-in-out infinite;
+}
+
+@keyframes nebula {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  66% {
+    transform: scale(0.9) rotate(-5deg);
+  }
+}
+
+/* ============================================
+   SCAN LINES (Efeito Retro Futurista)
+   ============================================ */
+
+.bg-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--border-secondary) 2px,
+    var(--border-secondary) 4px
+  );
+  opacity: 0.03;
+  pointer-events: none;
+  animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(50px);
+  }
+}
+
+/* ============================================
+   VIGNETTE EFFECT
+   ============================================ */
+
+.bg-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    var(--bg-primary) 100%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ============================================
+   NOISE TEXTURE
+   ============================================ */
+
+.bg-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* ============================================
+   COMBINAÇÕES RECOMENDADAS
+   ============================================ */
+
+/* Dark Modern */
+.bg-dark-modern {
+  background: var(--bg-primary);
+}
+
+.bg-dark-modern .animated-background {
+  background: var(--bg-primary);
+}
+
+/* Neon Future */
+.bg-neon-future {
+  background: var(--bg-primary);
+}
+
+/* Aurora */
+.bg-aurora-theme {
+  background: var(--bg-primary);
+}
+
+/* Space UI */
+.bg-space-ui {
+  background: var(--bg-primary);
+}
+
+/* ============================================
+   PARALLAX EFFECT
+   ============================================ */
+
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.1s ease-out;
+}
+
+.parallax-layer-1 {
+  transform: translateZ(-100px) scale(2);
+}
+
+.parallax-layer-2 {
+  transform: translateZ(-50px) scale(1.5);
+}
+
+.parallax-layer-3 {
+  transform: translateZ(0);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .blob,
+  .glow-orb {
+    width: 300px !important;
+    height: 300px !important;
+  }
+  
+  .bg-waves {
+    height: 150px;
+  }
+  
+  .bg-mesh-gradient,
+  .bg-aurora,
+  .bg-nebula {
+    opacity: 0.4;
+  }
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-background *,
+  .blob,
+  .glow-orb,
+  .particle,
+  .star,
+  .wave {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* GPU Acceleration */
+.animated-background,
+.blob,
+.glow-orb,
+.particle,
+.star,
+.wave,
+.bg-mesh-gradient,
+.bg-aurora,
+.bg-nebula {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

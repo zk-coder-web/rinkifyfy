@@ -1,0 +1,17 @@
+{
+  "name": "instagram-profile-checker",
+  "version": "1.0.0",
+  "description": "Verificador de perfis do Instagram",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node servidor.js",
+    "dev": "node servidor.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": ["instagram", "checker", "profile"],
+  "author": "",
+  "license": "MIT"
+}

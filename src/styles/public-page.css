@@ -1,0 +1,407 @@
+/* Temas Dinâmicos */
+
+/* TEMA ROSA NEON (padrão) */
+body.public-page.theme-rosa {
+  background: linear-gradient(135deg, #ff1493 0%, #ff69b4 25%, #ffc0cb 50%, #ff69b4 75%, #ff1493 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 8s ease infinite;
+}
+
+/* TEMA PRETO E BRANCO */
+body.public-page.theme-preto {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 25%, #e8e8e8 50%, #f5f5f5 75%, #ffffff 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 8s ease infinite;
+  color: #1a1a1a;
+}
+
+/* TEMA AZUL RANKIFY */
+body.public-page.theme-azul {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #3b82f6 75%, #1e40af 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 8s ease infinite;
+}
+
+/* Base para todas as páginas públicas */
+body.public-page {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body.public-page::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Overlay por tema */
+body.public-page.theme-rosa::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(255, 20, 147, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+body.public-page.theme-preto::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 30% 20%, rgba(0, 0, 0, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+body.public-page.theme-azul::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Corações por tema */
+.heart-container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2;
+  top: -30px;
+  width: 28px;
+  height: 28px;
+  animation: fly linear infinite;
+}
+
+/* Corações Rosa */
+.theme-rosa .heart-container {
+  filter: drop-shadow(0 0 8px rgba(255, 20, 147, 0.6));
+}
+
+/* Corações Preto/Branco */
+.theme-preto .heart-container {
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Corações Azul */
+.theme-azul .heart-container {
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+@keyframes fly {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg) scale(0.8);
+    opacity: 0.7;
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(calc(var(--tx) * 0.3)) translateY(25vh) rotate(90deg) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(calc(var(--tx) * 0.7)) translateY(50vh) rotate(180deg) scale(1.1);
+  }
+  75% {
+    opacity: 0.6;
+    transform: translateX(var(--tx)) translateY(75vh) rotate(270deg) scale(0.9);
+  }
+  100% {
+    transform: translateX(var(--tx)) translateY(100vh) rotate(360deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+.heart-container:nth-child(1) { left: 10%; animation-duration: 22s; animation-delay: 0s; --tx: 60px; }
+.heart-container:nth-child(2) { left: 25%; animation-duration: 26s; animation-delay: 4s; --tx: -80px; }
+.heart-container:nth-child(3) { left: 50%; animation-duration: 24s; animation-delay: 8s; --tx: 100px; }
+.heart-container:nth-child(4) { left: 75%; animation-duration: 28s; animation-delay: 12s; --tx: -70px; }
+.heart-container:nth-child(5) { left: 90%; animation-duration: 25s; animation-delay: 16s; --tx: 90px; }
+
+/* Shine suave nos botões */
+.shine-slim {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-slim::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -150%; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-15deg);
+  animation: shine 4s infinite;
+}
+
+@keyframes shine {
+  0% { left: -150%; }
+  25% { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* Botões base */
+.btn-slim {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto 12px auto;
+  z-index: 3;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.theme-preto .btn-slim {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.btn-slim:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-3px) scale(1.02);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.theme-preto .btn-slim:hover {
+  border-color: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.btn-slim:active { 
+  transform: scale(0.98); 
+  transition: transform 0.1s;
+}
+
+/* Botões Google */
+.btn-slim-google {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.9), rgba(51, 103, 214, 0.9)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn-slim-google:hover {
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  background: linear-gradient(135deg, rgba(51, 103, 214, 0.95), rgba(66, 133, 244, 0.95)) !important;
+}
+
+/* Botões Instagram */
+.btn-slim-insta {
+  background: linear-gradient(135deg, rgba(217, 48, 91, 0.9), rgba(187, 38, 71, 0.9)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn-slim-insta:hover {
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  background: linear-gradient(135deg, rgba(187, 38, 71, 0.95), rgba(217, 48, 91, 0.95)) !important;
+}
+
+/* Botões WhatsApp */
+.btn-slim-whats {
+  background: linear-gradient(135deg, rgba(37, 211, 102, 0.9), rgba(27, 171, 82, 0.9)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn-slim-whats:hover {
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  background: linear-gradient(135deg, rgba(27, 171, 82, 0.95), rgba(37, 211, 102, 0.95)) !important;
+}
+
+.btn-slim span, .btn-slim p {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.theme-preto .btn-slim span,
+.theme-preto .btn-slim p {
+  color: #1a1a1a !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-text-main {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.btn-text-sub {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+.icon-box-google { 
+  background: #ffffff; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.icon-box-insta { 
+  background: rgba(255, 255, 255, 0.2); 
+  backdrop-filter: blur(10px);
+}
+
+.icon-box-whats { 
+  background: rgba(255, 255, 255, 0.2); 
+  backdrop-filter: blur(10px);
+}
+
+.fade-in {
+  animation: fadeIn 1.2s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+.title-header {
+  color: #ffffff;
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.theme-preto .title-header {
+  color: #1a1a1a;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle-header {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.theme-preto .subtitle-header {
+  color: rgba(0, 0, 0, 0.7);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.profile-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  filter: blur(12px);
+  opacity: 0.6;
+}
+
+/* Glow por tema */
+.theme-rosa .profile-glow {
+  background: linear-gradient(45deg, #ff1493, #ff69b4, #ffc0cb, #ff69b4, #ff1493);
+  background-size: 400% 400%;
+  animation: gradientBG 3s ease infinite;
+}
+
+.theme-preto .profile-glow {
+  background: linear-gradient(45deg, #ffffff, #cccccc, #888888, #cccccc, #ffffff);
+  background-size: 400% 400%;
+  animation: gradientBG 3s ease infinite;
+}
+
+.theme-azul .profile-glow {
+  background: linear-gradient(45deg, #1e40af, #3b82f6, #60a5fa, #3b82f6, #1e40af);
+  background-size: 400% 400%;
+  animation: gradientBG 3s ease infinite;
+}
+
+.profile-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  object-fit: cover;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.theme-preto .profile-image {
+  border: 3px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer removido - sem faixa rosa */
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  text-align: center;
+  padding: 8px 16px;
+  z-index: 10;
+  font-size: 10px;
+}
+
+.footer-fixed p {
+  margin: 0;
+  display: inline;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.theme-preto .footer-fixed p {
+  color: rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Container principal - mais para baixo */
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px 60px 20px;
+  position: relative;
+  z-index: 3;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 400px;
+}

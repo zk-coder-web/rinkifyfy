@@ -1,0 +1,507 @@
+/* ============================================
+   SISTEMA DE TEMAS PROFISSIONAIS
+   Design moderno, elegante e altamente refinado
+   ============================================ */
+
+/* ============================================
+   TEMA 1: MIDNIGHT PROFESSIONAL
+   Design corporativo sofisticado com azul profundo
+   Ideal para: Dashboards executivos, plataformas B2B
+   ============================================ */
+
+[data-theme="midnight-professional"] {
+  /* Backgrounds - Tons profundos e elegantes */
+  --bg-primary: #0b0e17;
+  --bg-secondary: #131720;
+  --bg-tertiary: #1a1f2e;
+  --bg-elevated: #232938;
+  --bg-overlay: rgba(11, 14, 23, 0.95);
+  
+  /* Superfícies com Glassmorphism sutil */
+  --surface-glass: rgba(248, 250, 252, 0.04);
+  --surface-glass-hover: rgba(248, 250, 252, 0.07);
+  --surface-glass-active: rgba(248, 250, 252, 0.10);
+  --surface-elevated: rgba(248, 250, 252, 0.06);
+  
+  /* Tipografia - Hierarquia clara e legível */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0e17;
+  
+  /* Acentos - Azul profissional e confiável */
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-primary-active: #1d4ed8;
+  --accent-secondary: #0ea5e9;
+  --accent-tertiary: #06b6d4;
+  
+  /* Estados - Cores semânticas claras */
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  
+  /* Bordas - Sutis e refinadas */
+  --border-primary: rgba(148, 163, 184, 0.12);
+  --border-secondary: rgba(148, 163, 184, 0.06);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  --border-hover: rgba(148, 163, 184, 0.18);
+  
+  /* Sombras e Glows - Profundidade sutil */
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(59, 130, 246, 0.25);
+  --glow-secondary: rgba(14, 165, 233, 0.20);
+  
+  /* Gradientes - Suaves e profissionais */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+  --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 2: SLATE EXECUTIVE
+   Minimalismo executivo com cinzas sofisticados
+   Ideal para: Aplicações corporativas, ferramentas de produtividade
+   ============================================ */
+
+[data-theme="slate-executive"] {
+  --bg-primary: #0f1419;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1f2937;
+  --bg-elevated: #2d3748;
+  --bg-overlay: rgba(15, 20, 25, 0.95);
+  
+  --surface-glass: rgba(249, 250, 251, 0.03);
+  --surface-glass-hover: rgba(249, 250, 251, 0.06);
+  --surface-glass-active: rgba(249, 250, 251, 0.09);
+  --surface-elevated: rgba(249, 250, 251, 0.05);
+  
+  --text-primary: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-tertiary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-inverse: #0f1419;
+  
+  --accent-primary: #8b5cf6;
+  --accent-primary-hover: #7c3aed;
+  --accent-primary-active: #6d28d9;
+  --accent-secondary: #a78bfa;
+  --accent-tertiary: #c4b5fd;
+  
+  --color-success: #34d399;
+  --color-success-bg: rgba(52, 211, 153, 0.1);
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.1);
+  --color-info: #60a5fa;
+  --color-info-bg: rgba(96, 165, 250, 0.1);
+  
+  --border-primary: rgba(229, 231, 235, 0.10);
+  --border-secondary: rgba(229, 231, 235, 0.05);
+  --border-focus: rgba(139, 92, 246, 0.5);
+  --border-hover: rgba(229, 231, 235, 0.15);
+  
+  --shadow-color: rgba(0, 0, 0, 0.6);
+  --glow-primary: rgba(139, 92, 246, 0.22);
+  --glow-secondary: rgba(167, 139, 250, 0.18);
+  
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(139, 92, 246, 0.10) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(167, 139, 250, 0.10) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(196, 181, 253, 0.10) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 3: EMERALD REFINED
+   Verde sofisticado e natural
+   Ideal para: Fintech, sustentabilidade, saúde
+   ============================================ */
+
+[data-theme="emerald-refined"] {
+  --bg-primary: #0a1410;
+  --bg-secondary: #0f1b17;
+  --bg-tertiary: #14241e;
+  --bg-elevated: #1a2f27;
+  --bg-overlay: rgba(10, 20, 16, 0.95);
+  
+  --surface-glass: rgba(236, 253, 245, 0.04);
+  --surface-glass-hover: rgba(236, 253, 245, 0.07);
+  --surface-glass-active: rgba(236, 253, 245, 0.10);
+  --surface-elevated: rgba(236, 253, 245, 0.06);
+  
+  --text-primary: #ecfdf5;
+  --text-secondary: #d1fae5;
+  --text-tertiary: #a7f3d0;
+  --text-muted: #6ee7b7;
+  --text-inverse: #0a1410;
+  
+  --accent-primary: #10b981;
+  --accent-primary-hover: #059669;
+  --accent-primary-active: #047857;
+  --accent-secondary: #34d399;
+  --accent-tertiary: #6ee7b7;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  
+  --border-primary: rgba(167, 243, 208, 0.12);
+  --border-secondary: rgba(167, 243, 208, 0.06);
+  --border-focus: rgba(16, 185, 129, 0.5);
+  --border-hover: rgba(167, 243, 208, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(16, 185, 129, 0.25);
+  --glow-secondary: rgba(52, 211, 153, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  --gradient-secondary: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(52, 211, 153, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(110, 231, 183, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 4: ROSE ELEGANT
+   Rosa sofisticado e moderno
+   Ideal para: Design, moda, lifestyle
+   ============================================ */
+
+[data-theme="rose-elegant"] {
+  --bg-primary: #18101a;
+  --bg-secondary: #1f1421;
+  --bg-tertiary: #2a1a2e;
+  --bg-elevated: #352238;
+  --bg-overlay: rgba(24, 16, 26, 0.95);
+  
+  --surface-glass: rgba(253, 242, 248, 0.04);
+  --surface-glass-hover: rgba(253, 242, 248, 0.07);
+  --surface-glass-active: rgba(253, 242, 248, 0.10);
+  --surface-elevated: rgba(253, 242, 248, 0.06);
+  
+  --text-primary: #fdf2f8;
+  --text-secondary: #fce7f3;
+  --text-tertiary: #fbcfe8;
+  --text-muted: #f9a8d4;
+  --text-inverse: #18101a;
+  
+  --accent-primary: #ec4899;
+  --accent-primary-hover: #db2777;
+  --accent-primary-active: #be185d;
+  --accent-secondary: #f472b6;
+  --accent-tertiary: #f9a8d4;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #ec4899;
+  --color-info-bg: rgba(236, 72, 153, 0.1);
+  
+  --border-primary: rgba(251, 207, 232, 0.12);
+  --border-secondary: rgba(251, 207, 232, 0.06);
+  --border-focus: rgba(236, 72, 153, 0.5);
+  --border-hover: rgba(251, 207, 232, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(236, 72, 153, 0.25);
+  --glow-secondary: rgba(244, 114, 182, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+  --gradient-secondary: linear-gradient(135deg, #f472b6 0%, #f9a8d4 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(236, 72, 153, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(244, 114, 182, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(249, 168, 212, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 5: AMBER PREMIUM
+   Dourado sofisticado e luxuoso
+   Ideal para: Premium brands, e-commerce de luxo
+   ============================================ */
+
+[data-theme="amber-premium"] {
+  --bg-primary: #1a1410;
+  --bg-secondary: #211a14;
+  --bg-tertiary: #2e241a;
+  --bg-elevated: #3a2e22;
+  --bg-overlay: rgba(26, 20, 16, 0.95);
+  
+  --surface-glass: rgba(254, 243, 199, 0.04);
+  --surface-glass-hover: rgba(254, 243, 199, 0.07);
+  --surface-glass-active: rgba(254, 243, 199, 0.10);
+  --surface-elevated: rgba(254, 243, 199, 0.06);
+  
+  --text-primary: #fef3c7;
+  --text-secondary: #fde68a;
+  --text-tertiary: #fcd34d;
+  --text-muted: #fbbf24;
+  --text-inverse: #1a1410;
+  
+  --accent-primary: #f59e0b;
+  --accent-primary-hover: #d97706;
+  --accent-primary-active: #b45309;
+  --accent-secondary: #fbbf24;
+  --accent-tertiary: #fcd34d;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  
+  --border-primary: rgba(252, 211, 77, 0.12);
+  --border-secondary: rgba(252, 211, 77, 0.06);
+  --border-focus: rgba(245, 158, 11, 0.5);
+  --border-hover: rgba(252, 211, 77, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(245, 158, 11, 0.25);
+  --glow-secondary: rgba(251, 191, 36, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  --gradient-secondary: linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(245, 158, 11, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(251, 191, 36, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(252, 211, 77, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 6: OCEAN DEPTH
+   Azul oceânico profundo e tranquilo
+   Ideal para: Tecnologia, comunicação, educação
+   ============================================ */
+
+[data-theme="ocean-depth"] {
+  --bg-primary: #0a1420;
+  --bg-secondary: #0f1b2e;
+  --bg-tertiary: #14243d;
+  --bg-elevated: #1a2f4d;
+  --bg-overlay: rgba(10, 20, 32, 0.95);
+  
+  --surface-glass: rgba(224, 242, 254, 0.04);
+  --surface-glass-hover: rgba(224, 242, 254, 0.07);
+  --surface-glass-active: rgba(224, 242, 254, 0.10);
+  --surface-elevated: rgba(224, 242, 254, 0.06);
+  
+  --text-primary: #e0f2fe;
+  --text-secondary: #bae6fd;
+  --text-tertiary: #7dd3fc;
+  --text-muted: #38bdf8;
+  --text-inverse: #0a1420;
+  
+  --accent-primary: #0ea5e9;
+  --accent-primary-hover: #0284c7;
+  --accent-primary-active: #0369a1;
+  --accent-secondary: #38bdf8;
+  --accent-tertiary: #7dd3fc;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #0ea5e9;
+  --color-info-bg: rgba(14, 165, 233, 0.1);
+  
+  --border-primary: rgba(125, 211, 252, 0.12);
+  --border-secondary: rgba(125, 211, 252, 0.06);
+  --border-focus: rgba(14, 165, 233, 0.5);
+  --border-hover: rgba(125, 211, 252, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(14, 165, 233, 0.25);
+  --glow-secondary: rgba(56, 189, 248, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+  --gradient-secondary: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(125, 211, 252, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 7: CRIMSON BOLD
+   Vermelho sofisticado e impactante
+   Ideal para: Entretenimento, esportes, energia
+   ============================================ */
+
+[data-theme="crimson-bold"] {
+  --bg-primary: #1a0a0a;
+  --bg-secondary: #210f0f;
+  --bg-tertiary: #2e1414;
+  --bg-elevated: #3a1a1a;
+  --bg-overlay: rgba(26, 10, 10, 0.95);
+  
+  --surface-glass: rgba(254, 226, 226, 0.04);
+  --surface-glass-hover: rgba(254, 226, 226, 0.07);
+  --surface-glass-active: rgba(254, 226, 226, 0.10);
+  --surface-elevated: rgba(254, 226, 226, 0.06);
+  
+  --text-primary: #fee2e2;
+  --text-secondary: #fecaca;
+  --text-tertiary: #fca5a5;
+  --text-muted: #f87171;
+  --text-inverse: #1a0a0a;
+  
+  --accent-primary: #dc2626;
+  --accent-primary-hover: #b91c1c;
+  --accent-primary-active: #991b1b;
+  --accent-secondary: #ef4444;
+  --accent-tertiary: #f87171;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #dc2626;
+  --color-error-bg: rgba(220, 38, 38, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  
+  --border-primary: rgba(252, 165, 165, 0.12);
+  --border-secondary: rgba(252, 165, 165, 0.06);
+  --border-focus: rgba(220, 38, 38, 0.5);
+  --border-hover: rgba(252, 165, 165, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(220, 38, 38, 0.25);
+  --glow-secondary: rgba(239, 68, 68, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  --gradient-secondary: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(220, 38, 38, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(239, 68, 68, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(248, 113, 113, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA 8: INDIGO CORPORATE
+   Índigo corporativo e confiável
+   Ideal para: Empresas, serviços financeiros, consultoria
+   ============================================ */
+
+[data-theme="indigo-corporate"] {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #141421;
+  --bg-tertiary: #1a1a2e;
+  --bg-elevated: #22223a;
+  --bg-overlay: rgba(15, 15, 26, 0.95);
+  
+  --surface-glass: rgba(224, 231, 255, 0.04);
+  --surface-glass-hover: rgba(224, 231, 255, 0.07);
+  --surface-glass-active: rgba(224, 231, 255, 0.10);
+  --surface-elevated: rgba(224, 231, 255, 0.06);
+  
+  --text-primary: #e0e7ff;
+  --text-secondary: #c7d2fe;
+  --text-tertiary: #a5b4fc;
+  --text-muted: #818cf8;
+  --text-inverse: #0f0f1a;
+  
+  --accent-primary: #6366f1;
+  --accent-primary-hover: #4f46e5;
+  --accent-primary-active: #4338ca;
+  --accent-secondary: #818cf8;
+  --accent-tertiary: #a5b4fc;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #6366f1;
+  --color-info-bg: rgba(99, 102, 241, 0.1);
+  
+  --border-primary: rgba(165, 180, 252, 0.12);
+  --border-secondary: rgba(165, 180, 252, 0.06);
+  --border-focus: rgba(99, 102, 241, 0.5);
+  --border-hover: rgba(165, 180, 252, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(99, 102, 241, 0.25);
+  --glow-secondary: rgba(129, 140, 248, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  --gradient-secondary: linear-gradient(135deg, #818cf8 0%, #a5b4fc 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(129, 140, 248, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(165, 180, 252, 0.12) 0px, transparent 50%);
+}
+
+/* ============================================
+   TEMA PADRÃO
+   Midnight Professional como padrão
+   ============================================ */
+
+:root {
+  /* Aplicar Midnight Professional como tema padrão */
+  --bg-primary: #0b0e17;
+  --bg-secondary: #131720;
+  --bg-tertiary: #1a1f2e;
+  --bg-elevated: #232938;
+  --bg-overlay: rgba(11, 14, 23, 0.95);
+  
+  --surface-glass: rgba(248, 250, 252, 0.04);
+  --surface-glass-hover: rgba(248, 250, 252, 0.07);
+  --surface-glass-active: rgba(248, 250, 252, 0.10);
+  --surface-elevated: rgba(248, 250, 252, 0.06);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0e17;
+  
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-primary-active: #1d4ed8;
+  --accent-secondary: #0ea5e9;
+  --accent-tertiary: #06b6d4;
+  
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  
+  --border-primary: rgba(148, 163, 184, 0.12);
+  --border-secondary: rgba(148, 163, 184, 0.06);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  --border-hover: rgba(148, 163, 184, 0.18);
+  
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-primary: rgba(59, 130, 246, 0.25);
+  --glow-secondary: rgba(14, 165, 233, 0.20);
+  
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+  --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  --gradient-mesh: radial-gradient(at 40% 20%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+}
