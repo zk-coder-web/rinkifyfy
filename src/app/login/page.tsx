@@ -54,16 +54,17 @@ function LoginPageInner() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
+        credentials: 'include',
       })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.user) {
             // Salvar dados do usuário no localStorage
             localStorage.setItem('googleUser', JSON.stringify(data.user))
-            // Redirecionar para dashboard após 1 segundo
+            // Redirecionar para dashboard após 500ms usando window.location
             setTimeout(() => {
-              router.push('/dashboard')
-            }, 1000)
+              window.location.href = '/dashboard'
+            }, 500)
           }
         })
         .catch(err => {
