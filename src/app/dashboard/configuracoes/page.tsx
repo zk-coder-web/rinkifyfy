@@ -17,6 +17,7 @@ interface UserDetails {
   verified: boolean
   createdAt: string
   createdTime: string
+  picture?: string
 }
 
 
