@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { upsertGoogleUser, createSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,25 +62,25 @@ export async function POST(req: NextRequest) {
 
     const userData = await userResponse.json();
 
-    // Criar sessão do usuário
-    const user = {
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      displayName: userData.name,
-      picture: userData.picture,
-      provider: 'google' as const,
-    };
+    // Criar ou atualizar usuário no banco
+    const user = upsertGoogleUser(userData.id, userData.email, userData.name);
+
+    // Criar sessão no banco
+    const sessionToken = createSession(user.id);
 
     // Criar resposta com cookie de sessão
     const response = NextResponse.json({
       success: true,
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name || user.display_name,
+        displayName: user.display_name,
+        picture: userData.picture,
+        provider: 'google',
+      },
     });
 
-    // Criar um token de sessão simples (em produção, usar JWT ou similar)
-    const sessionToken = Buffer.from(JSON.stringify(user)).toString('base64');
-    
     response.cookies.set('rankify_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
