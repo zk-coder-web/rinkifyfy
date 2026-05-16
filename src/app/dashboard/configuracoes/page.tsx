@@ -221,9 +221,17 @@ export default function ConfiguracoesPage() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-white shadow-lg flex items-center justify-center text-white font-black text-2xl shrink-0 bg-gradient-to-br from-blue-600 to-cyan-400">
-                  <span>{(userDetails?.name || userDetails?.displayName || 'U')[0].toUpperCase()}</span>
-                </div>
+                {userDetails?.picture ? (
+                  <img
+                    src={userDetails.picture}
+                    alt={userDetails.name || 'Avatar'}
+                    className="w-20 h-20 rounded-full border-3 border-white shadow-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-white shadow-lg flex items-center justify-center text-white font-black text-2xl shrink-0 bg-gradient-to-br from-blue-600 to-cyan-400">
+                    <span>{(userDetails?.name || userDetails?.displayName || 'U')[0].toUpperCase()}</span>
+                  </div>
+                )}
               </div>
 
               {/* Informações */}

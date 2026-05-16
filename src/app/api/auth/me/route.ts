@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
             email: googleUser.email,
             name: googleUser.name,
             displayName: googleUser.name,
+            picture: googleUser.picture,
             provider: 'google',
             verified: true,
           }
