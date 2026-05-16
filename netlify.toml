@@ -1,0 +1,51 @@
+[build]
+command = "npm run build"
+publish = ".next"
+
+[build.environment]
+NODE_VERSION = "20"
+NODE_ENV = "production"
+
+# URL da API
+NEXT_PUBLIC_API_URL = "https://rinkifyfy.vercel.app"
+NEXT_PUBLIC_APP_URL = "https://rinkifyfy.vercel.app"
+
+# Configurações do banco de dados (SQLite)
+DATABASE_URL = "file:./rankify.db"
+
+# Segurança
+NEXTAUTH_SECRET = "your-secret-key-here"
+NEXTAUTH_URL = "https://rinkifyfy.vercel.app"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = "883498714141-u9drnfttupbn50ahkkavs9g29t0g3ijh.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "your-google-client-secret"
+GOOGLE_REDIRECT_URI = "https://rinkifyfy.vercel.app/api/auth/google/callback"
+
+# SMTP - Configurações do Gmail para envio de emails
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_SECURE = "false"
+SMTP_USER = "zkdopix@gmail.com"
+SMTP_PASS = "zbfnuvbigijwbmch"
+SMTP_FROM = "Rankify <noreply@rankify.com.br>"
+
+# Password Security
+PASSWORD_PEPPER = "sua-chave-pepper-aleatoria-segura-aqui"
+
+[[redirects]]
+from = "/_next/image"
+to = "/.netlify/images"
+status = 200
+query = { url = ":url", w = ":width", q = ":quality" }
+
+[[redirects]]
+from = "/_ipx/*"
+to = "/.netlify/images"
+status = 200
+query = { url = ":url", w = ":width", q = ":quality" }
+
+[[headers]]
+for = "/_next/static/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
