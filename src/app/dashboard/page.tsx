@@ -167,6 +167,19 @@ export default function DashboardPage() {
 
   // Busca o nome diretamente da API para garantir dados atualizados
   const fetchUserName = () => {
+    // Primeiro tenta buscar do localStorage (Google OAuth)
+    const googleUser = localStorage.getItem('googleUser')
+    if (googleUser) {
+      try {
+        const userData = JSON.parse(googleUser)
+        setDisplayName(userData.name || '')
+        return
+      } catch (e) {
+        console.error('Erro ao parsear googleUser:', e)
+      }
+    }
+
+    // Se não tiver no localStorage, busca da API
     fetch('/api/auth/user', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {

@@ -48,6 +48,30 @@ function LoginPageInner() {
       setToast('Login bem sucedido!')
       // Armazenar código no localStorage para usar depois
       localStorage.setItem('googleAuthCode', code)
+      
+      // Chamar o backend para trocar código por dados do usuário
+      fetch('/api/auth/google/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user) {
+            // Salvar dados do usuário no localStorage
+            localStorage.setItem('googleUser', JSON.stringify(data.user))
+            // Redirecionar para dashboard após 1 segundo
+            setTimeout(() => {
+              router.push('/dashboard')
+            }, 1000)
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao processar login:', err)
+          setToastOk(false)
+          setToast('Erro ao processar login. Tente novamente.')
+        })
+      
       // Limpar a URL
       window.history.replaceState({}, document.title, '/login')
       return
@@ -67,7 +91,7 @@ function LoginPageInner() {
       setToastOk(true)
       setToast('Conta criada com sucesso! Faça login para continuar.')
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   useEffect(() => {
     const err = searchParams.get('error')
