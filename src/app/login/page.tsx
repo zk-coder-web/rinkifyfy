@@ -40,6 +40,18 @@ function LoginPageInner() {
     const email = searchParams.get('email')
     const mode = searchParams.get('mode')
     const created = searchParams.get('created')
+    const code = searchParams.get('code')
+    
+    // Handle Google OAuth callback
+    if (code) {
+      setToastOk(true)
+      setToast('Login bem sucedido!')
+      // Armazenar código no localStorage para usar depois
+      localStorage.setItem('googleAuthCode', code)
+      // Limpar a URL
+      window.history.replaceState({}, document.title, '/login')
+      return
+    }
     
     if (mode === 'register') {
       setMode('register')
