@@ -22,108 +22,128 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log(`[Instagram Verify] Verificando usuário: ${cleanUsername}`)
+
     try {
-      // Criar AbortController para timeout
+      // Método 1: Tentar com a página HTML diretamente (sem __a=1)
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      const timeoutId = setTimeout(() => controller.abort(), 15000)
 
       try {
-        // Tentar verificar o perfil do Instagram usando web scraping
-        const response = await fetch(`https://www.instagram.com/${cleanUsername}/?__a=1&__d=dis`, {
+        const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'pt-BR,pt;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
           },
           signal: controller.signal,
         })
 
         clearTimeout(timeoutId)
 
-        if (!response.ok) {
-          // Se a API JSON falhar, tentar com a página HTML
-          const controller2 = new AbortController()
-          const timeoutId2 = setTimeout(() => controller2.abort(), 10000)
+        console.log(`[Instagram Verify] Response status: ${htmlResponse.status}`)
 
-          const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
-            signal: controller2.signal,
-          })
-
-          clearTimeout(timeoutId2)
-
-          if (!htmlResponse.ok || htmlResponse.status === 404) {
-            return NextResponse.json(
-              { error: '@ do usuário não encontrado.' },
-              { status: 404 }
-            )
-          }
-
-          const html = await htmlResponse.text()
-          
-          // Procurar por dados no HTML
-          const nameMatch = html.match(/"full_name":"([^"]+)"/)
-          const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
-          
-          if (!nameMatch && !followersMatch) {
-            return NextResponse.json(
-              { error: '@ do usuário não encontrado.' },
-              { status: 404 }
-            )
-          }
-
-          return NextResponse.json({
-            success: true,
-            data: {
-              username: cleanUsername,
-              nome: nameMatch ? nameMatch[1] : cleanUsername,
-              seguidores: followersMatch ? parseInt(followersMatch[1]) : 0,
-            },
-          })
-        }
-
-        const data = await response.json()
-
-        // Extrair dados da resposta JSON
-        const user = data.user || data.graphql?.user
-        
-        if (!user) {
+        if (!htmlResponse.ok || htmlResponse.status === 404) {
+          console.log(`[Instagram Verify] Usuário não encontrado (status ${htmlResponse.status})`)
           return NextResponse.json(
             { error: '@ do usuário não encontrado.' },
             { status: 404 }
           )
         }
 
+        const html = await htmlResponse.text()
+        
+        // Procurar por dados no HTML usando múltiplos padrões
+        let nome = null
+        let seguidores = 0
+
+        // Padrão 1: full_name em JSON
+        const nameMatch = html.match(/"full_name":"([^"]+)"/)
+        if (nameMatch) {
+          nome = nameMatch[1]
+          console.log(`[Instagram Verify] Nome encontrado (padrão 1): ${nome}`)
+        }
+
+        // Padrão 2: edge_followed_by count
+        const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
+        if (followersMatch) {
+          seguidores = parseInt(followersMatch[1])
+          console.log(`[Instagram Verify] Seguidores encontrados (padrão 2): ${seguidores}`)
+        }
+
+        // Padrão 3: Procurar por "follower_count"
+        if (!followersMatch) {
+          const followerCountMatch = html.match(/"follower_count"\s*:\s*([0-9]+)/)
+          if (followerCountMatch) {
+            seguidores = parseInt(followerCountMatch[1])
+            console.log(`[Instagram Verify] Seguidores encontrados (padrão 3): ${seguidores}`)
+          }
+        }
+
+        // Padrão 4: Procurar por username em og:title
+        if (!nome) {
+          const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/)
+          if (ogTitleMatch) {
+            nome = ogTitleMatch[1]
+            console.log(`[Instagram Verify] Nome encontrado (padrão 4): ${nome}`)
+          }
+        }
+
+        // Se encontrou algo, retornar sucesso
+        if (nome || seguidores > 0) {
+          console.log(`[Instagram Verify] Usuário verificado com sucesso`)
+          return NextResponse.json({
+            success: true,
+            data: {
+              username: cleanUsername,
+              nome: nome || cleanUsername,
+              seguidores: seguidores,
+            },
+          })
+        }
+
+        // Se não encontrou nada, verificar se a página existe
+        if (html.includes('Page Not Found') || html.includes('página não foi encontrada')) {
+          console.log(`[Instagram Verify] Página não encontrada`)
+          return NextResponse.json(
+            { error: '@ do usuário não encontrado.' },
+            { status: 404 }
+          )
+        }
+
+        // Se chegou aqui, a página existe mas não conseguiu extrair dados
+        console.log(`[Instagram Verify] Página existe mas sem dados extraíveis`)
+        // Retornar sucesso mesmo assim, pois a página existe
         return NextResponse.json({
           success: true,
           data: {
             username: cleanUsername,
-            nome: user.full_name || user.username || cleanUsername,
-            seguidores: user.edge_followed_by?.count || user.follower_count || 0,
+            nome: cleanUsername,
+            seguidores: 0,
           },
         })
       } catch (fetchError: any) {
         clearTimeout(timeoutId)
-        console.error('Erro ao verificar Instagram:', fetchError.message)
+        console.error(`[Instagram Verify] Erro ao fazer fetch: ${fetchError.message}`)
         
-        // Se tudo falhar, retornar erro genérico
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
         )
       }
     } catch (error: any) {
-      console.error('Erro ao verificar Instagram:', error.message)
+      console.error(`[Instagram Verify] Erro geral: ${error.message}`)
       
-      // Se tudo falhar, retornar erro genérico
       return NextResponse.json(
         { error: '@ do usuário não encontrado.' },
         { status: 404 }
       )
     }
   } catch (error) {
-    console.error('Erro ao verificar Instagram:', error)
+    console.error('[Instagram Verify] Erro ao processar requisição:', error)
     return NextResponse.json(
       { error: '@ do usuário não encontrado.' },
       { status: 404 }
