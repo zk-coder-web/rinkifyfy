@@ -23,38 +23,72 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Tentar verificar o perfil do Instagram usando web scraping
-      const response = await fetch(`https://www.instagram.com/${cleanUsername}/?__a=1&__d=dis`, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'application/json',
-        },
-        timeout: 10000,
-      })
+      // Criar AbortController para timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
 
-      if (!response.ok) {
-        // Se a API JSON falhar, tentar com a página HTML
-        const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
+      try {
+        // Tentar verificar o perfil do Instagram usando web scraping
+        const response = await fetch(`https://www.instagram.com/${cleanUsername}/?__a=1&__d=dis`, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json',
           },
-          timeout: 10000,
+          signal: controller.signal,
         })
 
-        if (!htmlResponse.ok || htmlResponse.status === 404) {
-          return NextResponse.json(
-            { error: '@ do usuário não encontrado.' },
-            { status: 404 }
-          )
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          // Se a API JSON falhar, tentar com a página HTML
+          const controller2 = new AbortController()
+          const timeoutId2 = setTimeout(() => controller2.abort(), 10000)
+
+          const htmlResponse = await fetch(`https://www.instagram.com/${cleanUsername}/`, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
+            signal: controller2.signal,
+          })
+
+          clearTimeout(timeoutId2)
+
+          if (!htmlResponse.ok || htmlResponse.status === 404) {
+            return NextResponse.json(
+              { error: '@ do usuário não encontrado.' },
+              { status: 404 }
+            )
+          }
+
+          const html = await htmlResponse.text()
+          
+          // Procurar por dados no HTML
+          const nameMatch = html.match(/"full_name":"([^"]+)"/)
+          const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
+          
+          if (!nameMatch && !followersMatch) {
+            return NextResponse.json(
+              { error: '@ do usuário não encontrado.' },
+              { status: 404 }
+            )
+          }
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              username: cleanUsername,
+              nome: nameMatch ? nameMatch[1] : cleanUsername,
+              seguidores: followersMatch ? parseInt(followersMatch[1]) : 0,
+            },
+          })
         }
 
-        const html = await htmlResponse.text()
+        const data = await response.json()
+
+        // Extrair dados da resposta JSON
+        const user = data.user || data.graphql?.user
         
-        // Procurar por dados no HTML
-        const nameMatch = html.match(/"full_name":"([^"]+)"/)
-        const followersMatch = html.match(/"edge_followed_by"\s*:\s*{[^}]*"count"\s*:\s*([0-9]+)/)
-        
-        if (!nameMatch && !followersMatch) {
+        if (!user) {
           return NextResponse.json(
             { error: '@ do usuário não encontrado.' },
             { status: 404 }
@@ -65,34 +99,22 @@ export async function POST(request: NextRequest) {
           success: true,
           data: {
             username: cleanUsername,
-            nome: nameMatch ? nameMatch[1] : cleanUsername,
-            seguidores: followersMatch ? parseInt(followersMatch[1]) : 0,
+            nome: user.full_name || user.username || cleanUsername,
+            seguidores: user.edge_followed_by?.count || user.follower_count || 0,
           },
         })
-      }
-
-      const data = await response.json()
-
-      // Extrair dados da resposta JSON
-      const user = data.user || data.graphql?.user
-      
-      if (!user) {
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        console.error('Erro ao verificar Instagram:', fetchError.message)
+        
+        // Se tudo falhar, retornar erro genérico
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
         )
       }
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          username: cleanUsername,
-          nome: user.full_name || user.username || cleanUsername,
-          seguidores: user.edge_followed_by?.count || user.follower_count || 0,
-        },
-      })
-    } catch (fetchError: any) {
-      console.error('Erro ao verificar Instagram:', fetchError.message)
+    } catch (error: any) {
+      console.error('Erro ao verificar Instagram:', error.message)
       
       // Se tudo falhar, retornar erro genérico
       return NextResponse.json(
