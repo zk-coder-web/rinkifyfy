@@ -23,6 +23,7 @@ interface UserRow {
   failed_logins: number;
   locked_until?: string;
   created_at?: string;
+  picture?: string;
 }
 
 interface SessionRow {
