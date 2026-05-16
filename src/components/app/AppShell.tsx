@@ -75,7 +75,7 @@ function useUnreadNotif() {
 function Sidebar() {
   const pathname = usePathname()
   const { logout, user } = useAuth()
-  const [userDetails, setUserDetails] = useState<{ name: string; displayName: string } | null>(null)
+  const [userDetails, setUserDetails] = useState<{ name: string; displayName: string; picture?: string } | null>(null)
 
   // Busca dados atualizados do usuário periodicamente
   useEffect(() => {
@@ -86,7 +86,8 @@ function Sidebar() {
           const data = await res.json()
           setUserDetails({ 
             name: data.user?.name || '', 
-            displayName: data.user?.displayName || '' 
+            displayName: data.user?.displayName || '',
+            picture: data.user?.picture
           })
         }
       } catch { /* ignore */ }
@@ -97,6 +98,7 @@ function Sidebar() {
 
   // Usa os dados da API ou fallback para o user do contexto
   const displayName = userDetails?.displayName || userDetails?.name || user?.displayName || user?.name || ''
+  const picture = userDetails?.picture
 
   return (
     <aside className="hidden md:flex flex-col fixed left-0 top-0 w-64 h-screen border-r border-slate-200 dark:border-dark-border bg-white dark:bg-dark-card">
@@ -106,9 +108,17 @@ function Sidebar() {
 
       <div className="px-4 py-4 border-b border-slate-200 dark:border-dark-border">
         <div className="flex items-center gap-3 rounded-2xl bg-slate-100 dark:bg-dark-bg px-3 py-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-white font-black text-sm shrink-0">
-            {displayName?.[0]?.toUpperCase() || 'U'}
-          </div>
+          {picture ? (
+            <img
+              src={picture}
+              alt={displayName}
+              className="w-9 h-9 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-white font-black text-sm shrink-0">
+              {displayName?.[0]?.toUpperCase() || 'U'}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="text-sm font-black text-slate-900 dark:text-dark-text truncate">
               {displayName || 'Usuário'}
