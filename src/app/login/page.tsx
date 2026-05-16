@@ -49,6 +49,8 @@ function LoginPageInner() {
       // Armazenar código no localStorage para usar depois
       localStorage.setItem('googleAuthCode', code)
       
+      console.log('[Login] Processing Google callback with code:', code)
+      
       // Chamar o backend para trocar código por dados do usuário
       fetch('/api/auth/google/callback', {
         method: 'POST',
@@ -56,19 +58,28 @@ function LoginPageInner() {
         body: JSON.stringify({ code }),
         credentials: 'include',
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.user) {
+        .then(async res => {
+          console.log('[Login] Backend response status:', res.status)
+          const data = await res.json()
+          console.log('[Login] Backend response data:', data)
+          
+          if (res.ok && data.success && data.user) {
+            console.log('[Login] Login successful, redirecting to dashboard')
             // Salvar dados do usuário no localStorage
             localStorage.setItem('googleUser', JSON.stringify(data.user))
             // Redirecionar para dashboard após 500ms usando window.location
             setTimeout(() => {
+              console.log('[Login] Redirecting to /dashboard')
               window.location.href = '/dashboard'
             }, 500)
+          } else {
+            console.error('[Login] Backend error:', data.error)
+            setToastOk(false)
+            setToast(`Erro: ${data.error || 'Falha ao processar login'}`)
           }
         })
         .catch(err => {
-          console.error('Erro ao processar login:', err)
+          console.error('[Login] Fetch error:', err)
           setToastOk(false)
           setToast('Erro ao processar login. Tente novamente.')
         })
