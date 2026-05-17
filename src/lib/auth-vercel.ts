@@ -1,10 +1,38 @@
 /**
- * Auth functions para PostgreSQL (Vercel + Neon)
- * Usa @vercel/postgres em vez de better-sqlite3
+ * Auth functions — Funciona com SQLite (local) e PostgreSQL (Vercel)
+ * Detecta automaticamente qual usar baseado no ambiente
  */
-import { sql } from '@vercel/postgres'
-import bcrypt from 'bcryptjs'
 import { NextRequest } from 'next/server'
+import bcrypt from 'bcryptjs'
+
+const IS_VERCEL = !!(
+  process.env.VERCEL === '1' ||
+  process.env.VERCEL_ENV ||
+  process.env.VERCEL_URL ||
+  process.env.VERCEL_REGION
+)
+
+console.log('[Auth] Ambiente detectado:', IS_VERCEL ? 'Vercel (PostgreSQL)' : 'Local (SQLite)')
+
+// Lazy load dos drivers para evitar erros de importação
+let sqliteDb: any = null
+let vercelSql: any = null
+
+function getSqliteDb() {
+  if (!sqliteDb && !IS_VERCEL) {
+    const { getDb } = require('./db')
+    sqliteDb = getDb()
+  }
+  return sqliteDb
+}
+
+async function getVercelSql() {
+  if (!vercelSql && IS_VERCEL) {
+    const { sql } = await import('@vercel/postgres')
+    vercelSql = sql
+  }
+  return vercelSql
+}
 
 // ============ TYPES ============
 export interface UserRow {
@@ -58,15 +86,26 @@ export async function getUserIdFromToken(request: NextRequest): Promise<number |
 
     if (!token) return null
 
-    const result = await sql`
-      SELECT user_id, expires_at
-      FROM sessions
-      WHERE token = ${token} AND expires_at > NOW()::TEXT
-      LIMIT 1
-    `
-
-    if (result.rows.length === 0) return null
-    return (result.rows[0] as any).user_id
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT user_id, expires_at
+        FROM sessions
+        WHERE token = ${token} AND expires_at > NOW()::TEXT
+        LIMIT 1
+      `
+      if (result.rows.length === 0) return null
+      return (result.rows[0] as any).user_id
+    } else {
+      const db = getSqliteDb()
+      const session = db.prepare(`
+        SELECT user_id, expires_at
+        FROM sessions
+        WHERE token = ? AND expires_at > datetime('now')
+        LIMIT 1
+      `).get(token) as SessionRow | undefined
+      return session ? session.user_id : null
+    }
   } catch (error) {
     console.error('Erro ao obter userId do token:', error)
     return null
@@ -78,25 +117,45 @@ export async function getSessionUser(requestOrToken: NextRequest | string): Prom
     let userId: number | null = null
     
     if (typeof requestOrToken === 'string') {
-      const result = await sql`
-        SELECT user_id, expires_at
-        FROM sessions
-        WHERE token = ${requestOrToken} AND expires_at > NOW()::TEXT
-        LIMIT 1
-      `
-      userId = result.rows.length > 0 ? (result.rows[0] as any).user_id : null
+      if (IS_VERCEL) {
+        const sql = await getVercelSql()
+        const result = await sql`
+          SELECT user_id, expires_at
+          FROM sessions
+          WHERE token = ${requestOrToken} AND expires_at > NOW()::TEXT
+          LIMIT 1
+        `
+        userId = result.rows.length > 0 ? (result.rows[0] as any).user_id : null
+      } else {
+        const db = getSqliteDb()
+        const session = db.prepare(`
+          SELECT user_id, expires_at
+          FROM sessions
+          WHERE token = ? AND expires_at > datetime('now')
+          LIMIT 1
+        `).get(requestOrToken) as SessionRow | undefined
+        userId = session ? session.user_id : null
+      }
     } else {
       userId = await getUserIdFromToken(requestOrToken)
     }
 
     if (!userId) return null
 
-    const result = await sql`
-      SELECT * FROM users WHERE id = ${userId} LIMIT 1
-    `
-
-    if (result.rows.length === 0) return null
-    return result.rows[0] as UserRow
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT * FROM users WHERE id = ${userId} LIMIT 1
+      `
+      if (result.rows.length === 0) return null
+      return result.rows[0] as UserRow
+    } else {
+      const db = getSqliteDb()
+      const user = db.prepare(`
+        SELECT * FROM users WHERE id = ? LIMIT 1
+      `).get(userId) as UserRow | undefined
+      return user || null
+    }
   } catch (error) {
     console.error('Erro ao obter usuário da sessão:', error)
     return null
@@ -105,11 +164,20 @@ export async function getSessionUser(requestOrToken: NextRequest | string): Prom
 
 export async function getUserByEmail(email: string): Promise<UserRow | null> {
   try {
-    const result = await sql`
-      SELECT * FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1
-    `
-    if (result.rows.length === 0) return null
-    return result.rows[0] as UserRow
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT * FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1
+      `
+      if (result.rows.length === 0) return null
+      return result.rows[0] as UserRow
+    } else {
+      const db = getSqliteDb()
+      const user = db.prepare(`
+        SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1
+      `).get(email) as UserRow | undefined
+      return user || null
+    }
   } catch (error) {
     console.error('Erro ao obter usuário por email:', error)
     return null
@@ -160,10 +228,20 @@ export function generateCode(): string {
 export async function saveVerifyCode(email: string, code: string): Promise<void> {
   try {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
-    await sql`
-      INSERT INTO verify_codes (email, code, expires_at, used)
-      VALUES (${email.toLowerCase()}, ${code}, ${expiresAt}, 0)
-    `
+    
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        INSERT INTO verify_codes (email, code, expires_at, used)
+        VALUES (${email.toLowerCase()}, ${code}, ${expiresAt}, 0)
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`
+        INSERT INTO verify_codes (email, code, expires_at, used)
+        VALUES (?, ?, ?, 0)
+      `).run(email.toLowerCase(), code, expiresAt)
+    }
   } catch (error) {
     console.error('Erro ao salvar código de verificação:', error)
     throw error
@@ -172,22 +250,43 @@ export async function saveVerifyCode(email: string, code: string): Promise<void>
 
 export async function consumeVerifyCode(email: string, code: string): Promise<boolean> {
   try {
-    const result = await sql`
-      SELECT * FROM verify_codes
-      WHERE LOWER(email) = LOWER(${email})
-      AND code = ${code}
-      AND used = 0
-      AND expires_at > NOW()::TEXT
-      LIMIT 1
-    `
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT * FROM verify_codes
+        WHERE LOWER(email) = LOWER(${email})
+        AND code = ${code}
+        AND used = 0
+        AND expires_at > NOW()::TEXT
+        LIMIT 1
+      `
 
-    if (result.rows.length === 0) return false
+      if (result.rows.length === 0) return false
 
-    await sql`
-      UPDATE verify_codes SET used = 1
-      WHERE LOWER(email) = LOWER(${email})
-      AND code = ${code}
-    `
+      await sql`
+        UPDATE verify_codes SET used = 1
+        WHERE LOWER(email) = LOWER(${email})
+        AND code = ${code}
+      `
+    } else {
+      const db = getSqliteDb()
+      const row = db.prepare(`
+        SELECT * FROM verify_codes
+        WHERE LOWER(email) = LOWER(?)
+        AND code = ?
+        AND used = 0
+        AND expires_at > datetime('now')
+        LIMIT 1
+      `).get(email, code) as any
+
+      if (!row) return false
+
+      db.prepare(`
+        UPDATE verify_codes SET used = 1
+        WHERE LOWER(email) = LOWER(?)
+        AND code = ?
+      `).run(email, code)
+    }
 
     return true
   } catch (error) {
@@ -198,13 +297,25 @@ export async function consumeVerifyCode(email: string, code: string): Promise<bo
 
 export async function wasCodeVerified(email: string, code?: string): Promise<boolean> {
   try {
-    const result = await sql`
-      SELECT * FROM verify_codes
-      WHERE LOWER(email) = LOWER(${email})
-      AND used = 1
-      LIMIT 1
-    `
-    return result.rows.length > 0
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT * FROM verify_codes
+        WHERE LOWER(email) = LOWER(${email})
+        AND used = 1
+        LIMIT 1
+      `
+      return result.rows.length > 0
+    } else {
+      const db = getSqliteDb()
+      const row = db.prepare(`
+        SELECT * FROM verify_codes
+        WHERE LOWER(email) = LOWER(?)
+        AND used = 1
+        LIMIT 1
+      `).get(email) as any
+      return !!row
+    }
   } catch (error) {
     console.error('Erro ao verificar código:', error)
     return false
@@ -245,12 +356,24 @@ export async function createLocalUser(
   pin: string
 ): Promise<UserRow> {
   try {
-    const result = await sql`
-      INSERT INTO users (email, password, display_name, name, provider, pin, verified)
-      VALUES (${email.toLowerCase()}, ${hashedPassword}, ${displayName}, ${displayName}, 'local', ${pin}, 0)
-      RETURNING *
-    `
-    return result.rows[0] as UserRow
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        INSERT INTO users (email, password, display_name, name, provider, pin, verified)
+        VALUES (${email.toLowerCase()}, ${hashedPassword}, ${displayName}, ${displayName}, 'local', ${pin}, 0)
+        RETURNING *
+      `
+      return result.rows[0] as UserRow
+    } else {
+      const db = getSqliteDb()
+      const info = db.prepare(`
+        INSERT INTO users (email, password, display_name, name, provider, pin, verified)
+        VALUES (?, ?, ?, ?, 'local', ?, 0)
+      `).run(email.toLowerCase(), hashedPassword, displayName, displayName, pin)
+
+      const user = db.prepare(`SELECT * FROM users WHERE id = ?`).get(info.lastInsertRowid) as UserRow
+      return user
+    }
   } catch (error) {
     console.error('Erro ao criar usuário local:', error)
     throw error
@@ -260,10 +383,21 @@ export async function createLocalUser(
 export async function updateUserPassword(email: string, newPassword: string): Promise<boolean> {
   try {
     const hashed = await hashPassword(newPassword)
-    await sql`
-      UPDATE users SET password = ${hashed}
-      WHERE LOWER(email) = LOWER(${email})
-    `
+    
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        UPDATE users SET password = ${hashed}
+        WHERE LOWER(email) = LOWER(${email})
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`
+        UPDATE users SET password = ?
+        WHERE LOWER(email) = LOWER(?)
+      `).run(hashed, email)
+    }
+    
     return true
   } catch (error) {
     console.error('Erro ao atualizar senha:', error)
@@ -302,10 +436,20 @@ export function generateVerifyToken(): string {
 export async function saveVerifyToken(email: string, token: string): Promise<void> {
   try {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    await sql`
-      INSERT INTO verify_tokens (email, token, expires_at, used)
-      VALUES (${email.toLowerCase()}, ${token}, ${expiresAt}, 0)
-    `
+    
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        INSERT INTO verify_tokens (email, token, expires_at, used)
+        VALUES (${email.toLowerCase()}, ${token}, ${expiresAt}, 0)
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`
+        INSERT INTO verify_tokens (email, token, expires_at, used)
+        VALUES (?, ?, ?, 0)
+      `).run(email.toLowerCase(), token, expiresAt)
+    }
   } catch (error) {
     console.error('Erro ao salvar token de verificação:', error)
     throw error
@@ -314,24 +458,45 @@ export async function saveVerifyToken(email: string, token: string): Promise<voi
 
 export async function consumeVerifyToken(token: string): Promise<string | null> {
   try {
-    const result = await sql`
-      SELECT email FROM verify_tokens
-      WHERE token = ${token}
-      AND used = 0
-      AND expires_at > NOW()::TEXT
-      LIMIT 1
-    `
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT email FROM verify_tokens
+        WHERE token = ${token}
+        AND used = 0
+        AND expires_at > NOW()::TEXT
+        LIMIT 1
+      `
 
-    if (result.rows.length === 0) return null
+      if (result.rows.length === 0) return null
 
-    const email = (result.rows[0] as any).email
+      const email = (result.rows[0] as any).email
 
-    await sql`
-      UPDATE verify_tokens SET used = 1
-      WHERE token = ${token}
-    `
+      await sql`
+        UPDATE verify_tokens SET used = 1
+        WHERE token = ${token}
+      `
 
-    return email
+      return email
+    } else {
+      const db = getSqliteDb()
+      const row = db.prepare(`
+        SELECT email FROM verify_tokens
+        WHERE token = ?
+        AND used = 0
+        AND expires_at > datetime('now')
+        LIMIT 1
+      `).get(token) as any
+
+      if (!row) return null
+
+      db.prepare(`
+        UPDATE verify_tokens SET used = 1
+        WHERE token = ?
+      `).run(token)
+
+      return row.email
+    }
   } catch (error) {
     console.error('Erro ao consumir token de verificação:', error)
     return null
@@ -344,11 +509,20 @@ export function updateUserName(userId: number, name: string): boolean {
 
 export async function getUserById(userId: number): Promise<UserRow | null> {
   try {
-    const result = await sql`
-      SELECT * FROM users WHERE id = ${userId} LIMIT 1
-    `
-    if (result.rows.length === 0) return null
-    return result.rows[0] as UserRow
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      const result = await sql`
+        SELECT * FROM users WHERE id = ${userId} LIMIT 1
+      `
+      if (result.rows.length === 0) return null
+      return result.rows[0] as UserRow
+    } else {
+      const db = getSqliteDb()
+      const user = db.prepare(`
+        SELECT * FROM users WHERE id = ? LIMIT 1
+      `).get(userId) as UserRow | undefined
+      return user || null
+    }
   } catch (error) {
     console.error('Erro ao obter usuário por ID:', error)
     return null
@@ -374,10 +548,19 @@ export async function createPersistentSession(
     const refreshToken = `rft_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-    await sql`
-      INSERT INTO sessions (user_id, token, refresh_token, device_info, ip_address, expires_at)
-      VALUES (${userId}, ${token}, ${refreshToken}, ${deviceInfo || null}, ${ipAddress || null}, ${expiresAt})
-    `
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        INSERT INTO sessions (user_id, token, refresh_token, device_info, ip_address, expires_at)
+        VALUES (${userId}, ${token}, ${refreshToken}, ${deviceInfo || null}, ${ipAddress || null}, ${expiresAt})
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`
+        INSERT INTO sessions (user_id, token, refresh_token, device_info, ip_address, expires_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(userId, token, refreshToken, deviceInfo || null, ipAddress || null, expiresAt)
+    }
 
     return { token, refreshToken }
   } catch (error) {
