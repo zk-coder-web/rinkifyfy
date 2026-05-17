@@ -14,9 +14,11 @@ import {
   wasCodeVerified,
   validatePassword,
   setUserPreference,
+  updateUserPassword,
+  updateUserPin,
+  markUserVerified,
 } from '@/lib/auth-vercel'
-import { getPendingPin, clearPendingPin } from '@/lib/pending-pin'
-import { getDb } from '@/lib/db'
+import { getPendingPin, clearPendingPin } from '@/lib/pending-pin-vercel'
 import { log } from '@/lib/stability'
 import { sendWelcomeUserEmail } from '@/lib/mailer'
 
@@ -42,7 +44,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const db = getDb()
     const existingUser = await getUserByEmail(email)
 
     console.log('[register] Usuário existente:', { exists: !!existingUser, hasPassword: existingUser?.password ? true : false })
@@ -52,21 +53,18 @@ export async function POST(req: NextRequest) {
       console.log('[register] Case 1: Usuário verificado, definindo senha')
       
       try {
-        const hashed = await hashPassword(password)
         const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
         
         // Update existing user with password
-        db.prepare(`
-          UPDATE users SET password = ?, verified = 1 WHERE email = ?
-        `).run(hashed, email)
+        await updateUserPassword(email, password)
 
         // Get PIN from pending or generate new one
-        let pin = getPendingPin(email)
+        let pin = await getPendingPin(email)
         if (!pin) {
           pin = String(Math.floor(1000 + Math.random() * 9000))
         }
-        db.prepare('UPDATE users SET pin = ? WHERE email = ?').run(pin, email)
-        clearPendingPin(email)
+        await updateUserPin(email, pin)
+        await clearPendingPin(email)
 
         const updatedUser = await getUserByEmail(email)
         console.log('[register] Usuário atualizado:', { id: updatedUser?.id, email })
@@ -137,7 +135,7 @@ export async function POST(req: NextRequest) {
     console.log('[register] Case 2: Fluxo normal de registro')
 
     // Retrieve PIN from DB-backed store
-    let pin = getPendingPin(email)
+    let pin = await getPendingPin(email)
     if (!pin) {
       // Generate PIN if not exists
       pin = String(Math.floor(1000 + Math.random() * 9000))
@@ -150,9 +148,9 @@ export async function POST(req: NextRequest) {
     
     // Create user as verified
     const user = await createLocalUser(email, hashed, displayName, pin)
-    db.prepare('UPDATE users SET verified = 1 WHERE id = ?').run(user.id)
+    await markUserVerified(email)
 
-    clearPendingPin(email)
+    await clearPendingPin(email)
 
     // Cria sessão persistente
     const { token, refreshToken } = await createPersistentSession(user.id, deviceInfo, ip)

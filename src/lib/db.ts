@@ -3,7 +3,6 @@
  * Detecta automaticamente o ambiente e usa o driver apropriado
  */
 import path from 'path'
-import Database from 'better-sqlite3'
 
 const IS_VERCEL = !!(
   process.env.VERCEL === '1' ||
@@ -12,21 +11,35 @@ const IS_VERCEL = !!(
   process.env.VERCEL_REGION
 )
 
+// Importação condicional de better-sqlite3
+let Database: any = null
+if (!IS_VERCEL) {
+  try {
+    Database = require('better-sqlite3')
+  } catch (error) {
+    console.warn('[DB] better-sqlite3 não disponível (esperado no Vercel)')
+  }
+}
+
 console.log('[DB] Inicializando banco de dados:', {
   environment: IS_VERCEL ? 'Vercel (PostgreSQL/Neon)' : 'Local (SQLite)',
   vercelDetected: IS_VERCEL,
 })
 
-let _db: Database.Database | null = null
+let _db: any = null
 
-export function getDb(): Database.Database {
+export function getDb(): any {
   if (IS_VERCEL) {
     // Em Vercel, não usar SQLite
     // As funções de auth devem usar @vercel/postgres diretamente
     throw new Error(
       'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. ' +
-      'Importe de auth-neon.ts em vez de auth.ts'
+      'Importe de auth-vercel.ts em vez de auth.ts'
     )
+  }
+  
+  if (!Database) {
+    throw new Error('better-sqlite3 não está disponível neste ambiente')
   }
 
   if (!_db) {
@@ -48,7 +61,7 @@ export function getDb(): Database.Database {
   return _db
 }
 
-function migrate(db: Database.Database) {
+function migrate(db: any) {
   try {
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (

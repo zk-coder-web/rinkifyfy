@@ -20,11 +20,16 @@ let vercelSql: any = null
 
 function getSqliteDb() {
   if (IS_VERCEL) {
-    throw new Error('Tentando usar SQLite em Vercel! Use PostgreSQL.')
+    throw new Error('Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. Importe de auth-vercel.ts em vez de auth.ts')
   }
   if (!sqliteDb) {
-    const { getDb } = require('./db')
-    sqliteDb = getDb()
+    // Importação dinâmica para evitar carregar better-sqlite3 no Vercel
+    try {
+      const { getDb } = require('./db')
+      sqliteDb = getDb()
+    } catch (error: any) {
+      throw new Error(`Erro ao carregar SQLite: ${error.message}`)
+    }
   }
   return sqliteDb
 }
@@ -393,13 +398,13 @@ export async function updateUserPassword(email: string, newPassword: string): Pr
     if (IS_VERCEL) {
       const sql = await getVercelSql()
       await sql`
-        UPDATE users SET password = ${hashed}
+        UPDATE users SET password = ${hashed}, verified = 1
         WHERE LOWER(email) = LOWER(${email})
       `
     } else {
       const db = getSqliteDb()
       db.prepare(`
-        UPDATE users SET password = ?
+        UPDATE users SET password = ?, verified = 1
         WHERE LOWER(email) = LOWER(?)
       `).run(hashed, email)
     }
@@ -407,6 +412,44 @@ export async function updateUserPassword(email: string, newPassword: string): Pr
     return true
   } catch (error) {
     console.error('Erro ao atualizar senha:', error)
+    return false
+  }
+}
+
+export async function updateUserPin(email: string, pin: string): Promise<boolean> {
+  try {
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        UPDATE users SET pin = ${pin}
+        WHERE LOWER(email) = LOWER(${email})
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`UPDATE users SET pin = ? WHERE LOWER(email) = LOWER(?)`).run(pin, email)
+    }
+    return true
+  } catch (error) {
+    console.error('Erro ao atualizar PIN:', error)
+    return false
+  }
+}
+
+export async function markUserVerified(email: string): Promise<boolean> {
+  try {
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      await sql`
+        UPDATE users SET verified = 1
+        WHERE LOWER(email) = LOWER(${email})
+      `
+    } else {
+      const db = getSqliteDb()
+      db.prepare(`UPDATE users SET verified = 1 WHERE LOWER(email) = LOWER(?)`).run(email)
+    }
+    return true
+  } catch (error) {
+    console.error('Erro ao marcar usuário como verificado:', error)
     return false
   }
 }

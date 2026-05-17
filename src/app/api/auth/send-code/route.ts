@@ -5,7 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { generateCode, saveVerifyCode, getUserByEmail, generateUniquePin, generateVerifyToken, saveVerifyToken } from '@/lib/auth-vercel'
-import { savePendingPin, purgeExpiredPins } from '@/lib/pending-pin'
+import { savePendingPin, purgeExpiredPins } from '@/lib/pending-pin-vercel'
 import { sendWelcomeEmail } from '@/lib/mailer'
 import { log } from '@/lib/stability'
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // Generate unique PIN and persist to DB — survives hot-reloads
     const pin = generateUniquePin()
-    savePendingPin(email, pin)
+    await savePendingPin(email, pin)
 
     // Generate secure verification token and save to DB
     const verifyToken = generateVerifyToken()
