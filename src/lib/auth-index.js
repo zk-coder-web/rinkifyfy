@@ -10,6 +10,8 @@ const IS_VERCEL = !!(
   process.env.VERCEL_REGION
 )
 
+console.log('[Auth] Ambiente detectado:', IS_VERCEL ? 'Vercel (PostgreSQL)' : 'Local (SQLite)')
+
 if (IS_VERCEL) {
   // Em Vercel, usar PostgreSQL via Neon
   module.exports = require('./auth-vercel')
