@@ -3,7 +3,7 @@
  * Verifies user email via token and returns JSON (for verify page)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { consumeVerifyToken, getUserByEmail, markUserVerified } from '@/lib/auth-vercel'
+import { consumeVerifyToken, getUserByEmail, markUserVerified, createLocalUser } from '@/lib/auth'
 import { log } from '@/lib/stability'
 
 export async function GET(req: NextRequest) {
@@ -46,8 +46,6 @@ export async function GET(req: NextRequest) {
     } else {
       // Create placeholder user (will set password later)
       console.log('[verify-token] Criando novo usuário placeholder')
-      // Usar createLocalUser sem senha
-      const { createLocalUser } = await import('@/lib/auth-vercel')
       const displayName = email.split('@')[0]
       await createLocalUser(email, '', displayName, null)
       await markUserVerified(email)

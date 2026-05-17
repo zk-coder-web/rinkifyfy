@@ -11,7 +11,7 @@ import {
   hashPassword,
   updateUserPassword,
   validatePassword,
-} from '@/lib/auth-vercel'
+} from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {

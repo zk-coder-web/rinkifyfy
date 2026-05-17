@@ -766,3 +766,44 @@ export function deleteUserPreference(userId: number, key: string): void {
     // Silencioso
   }
 }
+
+/**
+ * Marca usuário como verificado
+ */
+export function markUserVerified(email: string): boolean {
+  try {
+    const db = getDb()
+    db.prepare('UPDATE users SET verified = 1 WHERE email = ?').run(email.toLowerCase())
+    return true
+  } catch (error) {
+    console.error('Erro ao marcar usuário como verificado:', error)
+    return false
+  }
+}
+
+/**
+ * Executa uma query de atualização genérica
+ */
+export function executeUpdate(query: string, params: any[]): void {
+  try {
+    const db = getDb()
+    db.prepare(query).run(...params)
+  } catch (error) {
+    console.error('Erro ao executar update:', error)
+    throw error
+  }
+}
+
+/**
+ * Atualiza o PIN do usuário
+ */
+export function updateUserPin(email: string, pin: string): boolean {
+  try {
+    const db = getDb()
+    db.prepare('UPDATE users SET pin = ? WHERE email = ?').run(pin, email.toLowerCase())
+    return true
+  } catch (error) {
+    console.error('Erro ao atualizar PIN:', error)
+    return false
+  }
+}

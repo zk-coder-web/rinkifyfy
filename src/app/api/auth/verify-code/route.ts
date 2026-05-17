@@ -4,7 +4,7 @@
  * Validates the code. Returns { ok: true } so the client can proceed to set password.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { consumeVerifyCode } from '@/lib/auth-vercel'
+import { consumeVerifyCode } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {

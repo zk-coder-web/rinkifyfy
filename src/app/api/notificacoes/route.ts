@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
-import { getUserIdFromToken } from '@/lib/auth-vercel'
+import { getUserIdFromToken } from '@/lib/auth'
 
 // GET: Listar notificações do usuário
 export async function GET(request: NextRequest) {

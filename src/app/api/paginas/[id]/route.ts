@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
-import { getUserIdFromToken } from '@/lib/auth-vercel'
+import { getUserIdFromToken } from '@/lib/auth'
 
 // GET: Buscar página específica
 export async function GET(

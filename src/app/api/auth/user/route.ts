@@ -6,7 +6,7 @@
  * Updates user details (name, etc)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser } from '@/lib/auth-vercel'
+import { getSessionUser } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
