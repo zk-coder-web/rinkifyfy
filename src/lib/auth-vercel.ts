@@ -364,7 +364,7 @@ export async function createLocalUser(
   email: string,
   hashedPassword: string,
   displayName: string,
-  pin: string
+  pin?: string | null
 ): Promise<UserRow> {
   try {
     if (IS_VERCEL) {
