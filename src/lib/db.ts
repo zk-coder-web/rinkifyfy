@@ -21,6 +21,8 @@ let _db: Database.Database | null = null
 
 export function getDb(): Database.Database {
   if (IS_VERCEL) {
+    // Em Vercel, não usar SQLite
+    // As funções de auth devem usar @vercel/postgres diretamente
     throw new Error(
       'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. ' +
       'Importe de auth-neon.ts em vez de auth.ts'
