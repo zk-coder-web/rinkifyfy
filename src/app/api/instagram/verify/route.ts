@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getUserIdFromToken } from '@/lib/auth'
 
+/**
+ * DEPRECATED: Esta rota é mantida apenas para compatibilidade com versões antigas.
+ * Use /api/instagram/lookup em vez disso.
+ * 
+ * Esta rota agora redireciona para a nova implementação interna que não depende
+ * de um servidor Python externo.
+ */
 export async function POST(request: NextRequest) {
   try {
     const { username } = await request.json()
@@ -22,60 +30,82 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[Instagram Verify] Verificando usuário: ${cleanUsername}`)
+    console.log(`[Instagram Verify] Verificando usuário: ${cleanUsername} (redirecionando para /lookup)`)
 
-    // URL do servidor externo que roda o checker.py
-    // Você precisa configurar isso com a URL do seu servidor
-    const EXTERNAL_API_URL = process.env.INSTAGRAM_CHECKER_API_URL || 'http://localhost:5000'
+    // Verificar se o usuário está autenticado
+    const userId = await getUserIdFromToken(request)
+    if (!userId) {
+      return NextResponse.json(
+        { error: '@ do usuário não encontrado.' },
+        { status: 401 }
+      )
+    }
 
+    // Chamar a nova rota internamente
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 20000)
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-      const response = await fetch(`${EXTERNAL_API_URL}/check/${cleanUsername}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-        signal: controller.signal,
-      })
+      const lookupResponse = await fetch(
+        new URL('/api/instagram/lookup', request.url),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cookie': request.headers.get('cookie') || '',
+          },
+          body: JSON.stringify({ username: cleanUsername }),
+          signal: controller.signal,
+        }
+      )
 
       clearTimeout(timeoutId)
 
-      console.log(`[Instagram Verify] Response status: ${response.status}`)
-
-      if (!response.ok) {
-        console.log(`[Instagram Verify] Erro na resposta (status ${response.status})`)
+      if (!lookupResponse.ok) {
+        console.log(`[Instagram Verify] Erro na resposta do lookup (status ${lookupResponse.status})`)
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
         )
       }
 
-      const data = await response.json()
+      const data = await lookupResponse.json()
 
-      console.log(`[Instagram Verify] Resposta do servidor:`, data)
+      console.log(`[Instagram Verify] Resposta do lookup:`, data)
 
-      if (!data.success || !data.exists) {
-        console.log(`[Instagram Verify] Usuário não encontrado`)
+      // Converter resposta do novo formato para o formato antigo
+      if (data.status === 'not_found') {
         return NextResponse.json(
           { error: '@ do usuário não encontrado.' },
           { status: 404 }
         )
       }
 
+      if (data.status === 'rate_limited') {
+        return NextResponse.json(
+          { error: 'Limite temporário atingido. Tente novamente em alguns segundos.' },
+          { status: 429 }
+        )
+      }
+
+      if (data.status === 'unavailable') {
+        return NextResponse.json(
+          { error: 'Não foi possível obter os dados deste perfil.' },
+          { status: 503 }
+        )
+      }
+
+      // Sucesso - converter para formato antigo
       return NextResponse.json({
         success: true,
         data: {
           username: cleanUsername,
-          nome: data.nome || data.username || cleanUsername,
-          seguidores: data.seguidores || 0,
+          nome: data.fullName || cleanUsername,
+          seguidores: data.followersRaw || 0,
         },
       })
     } catch (fetchError: any) {
-      console.error(`[Instagram Verify] Erro ao chamar servidor externo: ${fetchError.message}`)
-      
-      // Se o servidor externo não está disponível, retornar erro
+      console.error(`[Instagram Verify] Erro ao chamar /lookup: ${fetchError.message}`)
       return NextResponse.json(
         { error: '@ do usuário não encontrado.' },
         { status: 404 }

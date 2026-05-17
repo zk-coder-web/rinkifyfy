@@ -6,6 +6,11 @@
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_APP_URL = "https://rankfy.netlify.app"
+  NEXT_PUBLIC_API_URL = "https://rankfy.netlify.app"
+  SMTP_HOST = "smtp.gmail.com"
+  SMTP_PORT = "587"
+  SMTP_SECURE = "false"
+  SMTP_FROM = "Rankify <noreply@rankify.com.br>"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

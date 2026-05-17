@@ -43,12 +43,28 @@ export async function POST(req: NextRequest) {
     saveVerifyToken(email, verifyToken)
 
     // Send welcome email with verification link and PIN
-    await sendWelcomeEmail(email, verifyToken, pin)
+    try {
+      await sendWelcomeEmail(email, verifyToken, pin)
+      log('info', 'send-code', `Verification link + PIN sent to ${email}`)
+    } catch (emailError: any) {
+      log('error', 'send-code', `Failed to send email to ${email}`, emailError)
+      console.error('[send-code] Email error details:', {
+        message: emailError?.message,
+        code: emailError?.code,
+        response: emailError?.response,
+      })
+      
+      // Retornar erro específico
+      return NextResponse.json(
+        { error: 'Erro ao enviar e-mail de verificação. Verifique se o e-mail está correto e tente novamente.' },
+        { status: 500 }
+      )
+    }
 
-    log('info', 'send-code', `Verification link + PIN sent to ${email}`)
     return NextResponse.json({ ok: true })
   } catch (err) {
     log('error', 'send-code', 'Failed to send verification', err)
+    console.error('[send-code] Error:', err)
     return NextResponse.json(
       { error: 'Erro ao enviar verificação. Tente novamente.' },
       { status: 500 }

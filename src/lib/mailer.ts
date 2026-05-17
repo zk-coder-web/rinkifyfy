@@ -5,9 +5,13 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 function getTransporter() {
   const port = Number(process.env.SMTP_PORT) || 587
   const secure = process.env.SMTP_SECURE === 'true'
+  const host = process.env.SMTP_HOST || 'smtp.ethereal.email'
+  
+  // Configuração específica para Gmail
+  const isGmail = host.includes('gmail.com')
   
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+    host,
     port,
     secure,
     auth: {
@@ -15,9 +19,11 @@ function getTransporter() {
       pass: process.env.SMTP_PASS || '',
     },
     // Configurações adicionais para Gmail
-    tls: {
-      rejectUnauthorized: false
-    }
+    ...(isGmail && {
+      tls: {
+        rejectUnauthorized: true
+      }
+    })
   })
 }
 
