@@ -4,7 +4,7 @@
  * Sends recovery email with verification code + PIN reminder.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserByEmail, generateCode, saveVerifyCode, getUserPin } from '@/lib/auth'
+import { getUserByEmail, generateCode, saveVerifyCode, getUserPin } from '@/lib/auth-index'
 import { sendRecoveryEmail } from '@/lib/mailer'
 
 export async function POST(req: NextRequest) {

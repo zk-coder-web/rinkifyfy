@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth'
+import { getUserIdFromToken } from '@/lib/auth-index'
 
 export type InstagramProfile = {
   username: string

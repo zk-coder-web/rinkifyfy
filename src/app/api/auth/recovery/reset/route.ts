@@ -11,7 +11,7 @@ import {
   hashPassword,
   updateUserPassword,
   validatePassword,
-} from '@/lib/auth'
+} from '@/lib/auth-index'
 
 export async function POST(req: NextRequest) {
   try {

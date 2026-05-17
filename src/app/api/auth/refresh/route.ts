@@ -4,7 +4,7 @@
  * Renova a sessão usando refresh token
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { refreshSessionByToken, updateSessionActivity } from '@/lib/auth'
+import { refreshSessionByToken, updateSessionActivity } from '@/lib/auth-index'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
-import { getUserIdFromToken } from '@/lib/auth'
+import { getUserIdFromToken } from '@/lib/auth-index'
 
 // GET: Listar todas as páginas do usuário
 export async function GET(request: NextRequest) {
