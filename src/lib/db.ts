@@ -1,13 +1,10 @@
 /**
- * SQLite database singleton — Rankify
- * WAL mode + foreign keys + safe migrations
- * Suporta tanto arquivo (local) quanto memória (Vercel/serverless)
+ * Database router — SQLite local, PostgreSQL (Neon) em Vercel
+ * Detecta automaticamente o ambiente e usa o driver apropriado
  */
 import path from 'path'
 import Database from 'better-sqlite3'
 
-// Detectar ambiente Vercel automaticamente
-// Vercel define várias variáveis de ambiente automaticamente
 const IS_VERCEL = !!(
   process.env.VERCEL === '1' ||
   process.env.VERCEL_ENV ||
@@ -15,37 +12,30 @@ const IS_VERCEL = !!(
   process.env.VERCEL_REGION
 )
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-
-// Usar DATABASE_URL se disponível, senão usar arquivo local
-// DATABASE_URL pode ser: file:./rankify.db ou :memory:
-let DB_PATH = process.env.DATABASE_URL || path.join(process.cwd(), 'rankify.db')
-
-// Se DATABASE_URL começa com "file:", remover o prefixo
-if (DB_PATH.startsWith('file:')) {
-  DB_PATH = DB_PATH.replace('file:', '')
-}
-
 console.log('[DB] Inicializando banco de dados:', {
-  environment: IS_VERCEL ? 'Vercel (serverless)' : 'Local',
-  path: DB_PATH,
-  mode: IS_VERCEL ? 'In-Memory' : 'File-based',
+  environment: IS_VERCEL ? 'Vercel (PostgreSQL/Neon)' : 'Local (SQLite)',
   vercelDetected: IS_VERCEL,
-  vercelEnv: process.env.VERCEL_ENV,
-  vercelUrl: process.env.VERCEL_URL,
 })
 
 let _db: Database.Database | null = null
 
 export function getDb(): Database.Database {
+  if (IS_VERCEL) {
+    throw new Error(
+      'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. ' +
+      'Importe de auth-neon.ts em vez de auth.ts'
+    )
+  }
+
   if (!_db) {
     try {
+      const DB_PATH = path.join(process.cwd(), 'rankify.db')
       _db = new Database(DB_PATH)
       _db.pragma('journal_mode = WAL')
       _db.pragma('foreign_keys = ON')
-      _db.pragma('busy_timeout = 5000')   // wait up to 5s on lock
+      _db.pragma('busy_timeout = 5000')
       
-      console.log('[DB] Banco de dados inicializado com sucesso')
+      console.log('[DB] Banco SQLite inicializado com sucesso')
       migrate(_db)
     } catch (error: any) {
       console.error('[DB] Erro ao inicializar banco de dados:', error.message)
