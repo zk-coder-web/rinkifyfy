@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       }, { status: 429 })
     }
 
-    const user = getUserByEmail(email)
+    const user = await getUserByEmail(email)
 
     // Mensagem genérica para evitar vazamento de informações
     if (!user) {
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     const deviceInfo = req.headers.get('user-agent') || 'Unknown'
     
     // Cria sessão persistente com refresh token
-    const { token, refreshToken } = createPersistentSession(user.id, deviceInfo, ip)
+    const { token, refreshToken } = await createPersistentSession(user.id, deviceInfo, ip)
     log('info', 'login', `User logged in: ${email} from IP ${ip}`)
 
     // Salva preferências básicas se não existirem

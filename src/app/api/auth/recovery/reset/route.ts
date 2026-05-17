@@ -34,13 +34,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const user = getUserByEmail(email)
+    const user = await getUserByEmail(email)
     if (!user || !user.verified) {
       return NextResponse.json({ error: 'Conta não encontrada.' }, { status: 404 })
     }
 
     // Validate code
-    const codeValid = consumeVerifyCode(email, code)
+    const codeValid = await consumeVerifyCode(email, code)
     if (!codeValid) {
       return NextResponse.json({ error: 'Código inválido ou expirado.' }, { status: 400 })
     }

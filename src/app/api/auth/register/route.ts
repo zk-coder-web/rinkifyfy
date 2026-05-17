@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDb()
-    const existingUser = getUserByEmail(email)
+    const existingUser = await getUserByEmail(email)
 
     console.log('[register] Usuário existente:', { exists: !!existingUser, hasPassword: existingUser?.password ? true : false })
 
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         db.prepare('UPDATE users SET pin = ? WHERE email = ?').run(pin, email)
         clearPendingPin(email)
 
-        const updatedUser = getUserByEmail(email)
+        const updatedUser = await getUserByEmail(email)
         console.log('[register] Usuário atualizado:', { id: updatedUser?.id, email })
 
         if (!updatedUser) {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         
         // Cria sessão persistente
         console.log('[register] Criando sessão persistente')
-        const { token, refreshToken } = createPersistentSession(updatedUser.id, deviceInfo, ip)
+        const { token, refreshToken } = await createPersistentSession(updatedUser.id, deviceInfo, ip)
         
         // Salva preferências
         setUserPreference(updatedUser.id, 'last_login', new Date().toISOString())
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
     clearPendingPin(email)
 
     // Cria sessão persistente
-    const { token, refreshToken } = createPersistentSession(user.id, deviceInfo, ip)
+    const { token, refreshToken } = await createPersistentSession(user.id, deviceInfo, ip)
     
     // Salva preferências
     setUserPreference(user.id, 'last_login', new Date().toISOString())

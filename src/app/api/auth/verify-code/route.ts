@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dados incompletos.' }, { status: 400 })
     }
 
-    const valid = consumeVerifyCode(email, code)
+    const valid = await consumeVerifyCode(email, code)
     if (!valid) {
       return NextResponse.json(
         { error: 'Código inválido ou expirado.' },

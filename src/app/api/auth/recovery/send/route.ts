@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'E-mail inválido.' }, { status: 400 })
     }
 
-    const user = getUserByEmail(email)
+    const user = await getUserByEmail(email)
 
     // Always return ok to avoid user enumeration
     if (!user || !user.verified || user.provider !== 'local') {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     if (!pin) return NextResponse.json({ ok: true })
 
     const code = generateCode()
-    saveVerifyCode(email, code)
+    await saveVerifyCode(email, code)
 
     await sendRecoveryEmail(email, code, pin)
 

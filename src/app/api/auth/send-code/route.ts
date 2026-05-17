@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'E-mail inválido.' }, { status: 400 })
     }
 
-    const existing = getUserByEmail(email)
+    const existing = await getUserByEmail(email)
     // Check if user exists AND has password (fully registered)
     if (existing?.password) {
       console.log('[send-code] Email já cadastrado:', email)
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Generate verification token (for link) - we'll keep code for PIN verification
     const code = generateCode()
-    saveVerifyCode(email, code)
+    await saveVerifyCode(email, code)
 
     // Generate unique PIN and persist to DB — survives hot-reloads
     const pin = generateUniquePin()
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     // Generate secure verification token and save to DB
     const verifyToken = generateVerifyToken()
-    saveVerifyToken(email, verifyToken)
+    await saveVerifyToken(email, verifyToken)
 
     console.log('[send-code] Enviando email para:', email)
 
