@@ -4,7 +4,7 @@
  * Uses DELETE method for idempotency and proper semantics.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, deleteSession } from '@/lib/auth-index'
+import { getSessionUser, deleteSession } from '@/lib/auth-vercel'
 import { getDb } from '@/lib/db'
 import { log } from '@/lib/stability'
 

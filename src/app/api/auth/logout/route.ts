@@ -3,7 +3,7 @@
  * Revoga a sessão atual do usuário
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { revokeSession, revokeOtherSessions } from '@/lib/auth-index'
+import { revokeSession, revokeOtherSessions } from '@/lib/auth-vercel'
 import { log } from '@/lib/stability'
 
 export async function POST(req: NextRequest) {

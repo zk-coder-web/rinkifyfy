@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth-index'
+import { getUserIdFromToken } from '@/lib/auth-vercel'
 
 export type InstagramProfile = {
   username: string

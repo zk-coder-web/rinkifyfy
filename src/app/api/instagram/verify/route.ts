@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth-index'
+import { getUserIdFromToken } from '@/lib/auth-vercel'
 
 /**
  * DEPRECATED: Esta rota é mantida apenas para compatibilidade com versões antigas.

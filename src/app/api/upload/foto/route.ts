@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth-index'
+import { getUserIdFromToken } from '@/lib/auth-vercel'
 import { getDb } from '@/lib/db'
 import path from 'path'
 import fs from 'fs'

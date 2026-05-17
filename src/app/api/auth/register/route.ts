@@ -14,7 +14,7 @@ import {
   wasCodeVerified,
   validatePassword,
   setUserPreference,
-} from '@/lib/auth-index'
+} from '@/lib/auth-vercel'
 import { getPendingPin, clearPendingPin } from '@/lib/pending-pin'
 import { getDb } from '@/lib/db'
 import { log } from '@/lib/stability'

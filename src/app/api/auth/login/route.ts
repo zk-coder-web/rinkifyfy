@@ -11,7 +11,7 @@ import {
   checkLoginRateLimit,
   recordLogin,
   setUserPreference 
-} from '@/lib/auth-index'
+} from '@/lib/auth-vercel'
 import { log } from '@/lib/stability'
 
 export async function POST(req: NextRequest) {

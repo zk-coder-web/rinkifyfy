@@ -5,7 +5,7 @@
  * DELETE /api/auth/preferences - Remove uma preferência
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, getAllUserPreferences, setUserPreference, deleteUserPreference } from '@/lib/auth-index'
+import { getSessionUser, getAllUserPreferences, setUserPreference, deleteUserPreference } from '@/lib/auth-vercel'
 
 export const dynamic = 'force-dynamic'
 

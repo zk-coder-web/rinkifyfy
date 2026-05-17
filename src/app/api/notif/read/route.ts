@@ -7,7 +7,7 @@
  * Returns list of read notif IDs for the current user.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, markNotifRead, getReadNotifIds } from '@/lib/auth-index'
+import { getSessionUser, markNotifRead, getReadNotifIds } from '@/lib/auth-vercel'
 
 async function getUser(req: NextRequest) {
   const token = req.cookies.get('rankify_session')?.value

@@ -4,7 +4,7 @@
  * Sends verification link + PIN to email. Token is persisted in DB.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { generateCode, saveVerifyCode, getUserByEmail, generateUniquePin, generateVerifyToken, saveVerifyToken } from '@/lib/auth-index'
+import { generateCode, saveVerifyCode, getUserByEmail, generateUniquePin, generateVerifyToken, saveVerifyToken } from '@/lib/auth-vercel'
 import { savePendingPin, purgeExpiredPins } from '@/lib/pending-pin'
 import { sendWelcomeEmail } from '@/lib/mailer'
 import { log } from '@/lib/stability'
