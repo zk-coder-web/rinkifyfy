@@ -54,3 +54,4 @@ profile-spy-light-main/
 verificarUser/
 .vercel
 .env*.local
+.data/
