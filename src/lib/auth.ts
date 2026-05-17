@@ -1,5 +1,18 @@
 import { NextRequest } from 'next/server'
-import { getDb } from './db'
+
+const IS_VERCEL = !!(
+  process.env.VERCEL === '1' ||
+  process.env.VERCEL_ENV ||
+  process.env.VERCEL_URL ||
+  process.env.VERCEL_REGION
+)
+
+// Em Vercel, não importar getDb
+let getDb: any = null
+if (!IS_VERCEL) {
+  const dbModule = require('./db')
+  getDb = dbModule.getDb
+}
 import { 
   verifyPasswordSecure, 
   checkRateLimit, 
