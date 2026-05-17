@@ -17,10 +17,7 @@ https://rinkifyfy-verify.vercel.app
 
 Copie e cole cada variável abaixo no painel da Vercel:
 
-#### Detecção de Ambiente
-```
-VERCEL = 1
-```
+**IMPORTANTE:** Vercel detecta automaticamente o ambiente. Não é necessário configurar `VERCEL=1`.
 
 #### URLs (Públicas)
 ```

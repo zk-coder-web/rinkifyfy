@@ -6,8 +6,15 @@
 import path from 'path'
 import Database from 'better-sqlite3'
 
-// Detectar ambiente
-const IS_VERCEL = process.env.VERCEL === '1'
+// Detectar ambiente Vercel automaticamente
+// Vercel define várias variáveis de ambiente automaticamente
+const IS_VERCEL = !!(
+  process.env.VERCEL === '1' ||
+  process.env.VERCEL_ENV ||
+  process.env.VERCEL_URL ||
+  process.env.VERCEL_REGION
+)
+
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 // Em produção (Vercel), usar memória. Localmente, usar arquivo.
@@ -17,6 +24,9 @@ console.log('[DB] Inicializando banco de dados:', {
   environment: IS_VERCEL ? 'Vercel (serverless)' : 'Local',
   path: DB_PATH,
   mode: IS_VERCEL ? 'In-Memory' : 'File-based',
+  vercelDetected: IS_VERCEL,
+  vercelEnv: process.env.VERCEL_ENV,
+  vercelUrl: process.env.VERCEL_URL,
 })
 
 let _db: Database.Database | null = null
@@ -33,6 +43,7 @@ export function getDb(): Database.Database {
       migrate(_db)
     } catch (error: any) {
       console.error('[DB] Erro ao inicializar banco de dados:', error.message)
+      console.error('[DB] Stack:', error.stack)
       throw error
     }
   }
