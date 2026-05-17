@@ -6,6 +6,24 @@ function getTransporter() {
   const port = Number(process.env.SMTP_PORT) || 587
   const secure = process.env.SMTP_SECURE === 'true'
   const host = process.env.SMTP_HOST || 'smtp.ethereal.email'
+  const user = process.env.SMTP_USER || ''
+  const pass = process.env.SMTP_PASS || ''
+  
+  // Log para debug
+  console.log('[Mailer] Configuração SMTP:', {
+    host,
+    port,
+    secure,
+    user: user ? `${user.substring(0, 5)}...` : 'VAZIO',
+    pass: pass ? '***' : 'VAZIO',
+  })
+  
+  // Validar credenciais
+  if (!user || !pass) {
+    console.error('[Mailer] ERRO: Credenciais SMTP não configuradas!')
+    console.error('[Mailer] SMTP_USER:', user ? 'configurado' : 'NÃO CONFIGURADO')
+    console.error('[Mailer] SMTP_PASS:', pass ? 'configurado' : 'NÃO CONFIGURADO')
+  }
   
   // Configuração específica para Gmail
   const isGmail = host.includes('gmail.com')
@@ -15,8 +33,8 @@ function getTransporter() {
     port,
     secure,
     auth: {
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
+      user,
+      pass,
     },
     // Configurações adicionais para Gmail
     ...(isGmail && {

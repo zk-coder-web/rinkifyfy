@@ -1,0 +1,13 @@
+{
+  "name": "verify-instagram",
+  "version": "1.2.5",
+  "description": "verification from IG",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
