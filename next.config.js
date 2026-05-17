@@ -36,6 +36,13 @@ const nextConfig = {
       config.externals = config.externals || []
       config.externals.push('better-sqlite3')
     }
+    
+    // Garantir que os aliases @ funcionem corretamente
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, 'src'),
+    }
+    
     return config
   },
 };
