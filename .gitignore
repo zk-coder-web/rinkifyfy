@@ -48,3 +48,7 @@ Thumbs.db
 tsconfig.tsbuildinfo
 report.json
 node_modules
+
+# Pastas de projetos externos
+profile-spy-light-main/
+verificarUser/
