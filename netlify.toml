@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && rm -rf .next && rm -rf node_modules/.cache && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
@@ -7,10 +7,6 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_APP_URL = "https://rkfy.netlify.app"
   NEXT_PUBLIC_API_URL = "https://rkfy.netlify.app"
-  SMTP_HOST = "smtp.gmail.com"
-  SMTP_PORT = "587"
-  SMTP_SECURE = "false"
-  SMTP_FROM = "Rankify <noreply@rankify.com.br>"
   NEXT_PUBLIC_USE_SIMPLE_AUTH = "true"
 
 [[plugins]]
