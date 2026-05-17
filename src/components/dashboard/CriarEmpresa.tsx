@@ -1,12 +1,22 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Building2, Instagram, MessageSquare, MapPin, Loader2, Check, X, Eye, X as XIcon } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
+import { Building2, Instagram, MessageSquare, MapPin, Loader2, Eye, X as XIcon, Users } from 'lucide-react'
 import { useErrorHandler } from '@/components/providers/ErrorHandler'
 import { getErrorMessage } from '@/lib/api-errors'
 import { AVAILABLE_THEMES, ThemeType } from '@/lib/page-generators'
 import PagePreview from './PagePreview'
 import QRCodeModal from './QRCodeModal'
+
+interface InstagramProfile {
+  username: string
+  fullName: string
+  followers: string
+  followersRaw: number | null
+  avatarUrl: string | null
+  status: 'ok' | 'not_found' | 'rate_limited' | 'unavailable'
+  error?: string
+}
 
 interface CriarEmpresaProps {
   onEmpresaCriada?: (empresa: {
@@ -25,12 +35,6 @@ interface EmpresaCriada {
   nome: string
 }
 
-interface InstagramVerification {
-  nome: string
-  seguidores: number
-  username: string
-}
-
 export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('neon-pink')
   const [nome, setNome] = useState('')
@@ -39,14 +43,37 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
   const [whatsapp, setWhatsapp] = useState('')
   const [erroPlaceId, setErroPlaceId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [instagramVerification, setInstagramVerification] = useState<InstagramVerification | null>(null)
-  const [instagramLoading, setInstagramLoading] = useState(false)
-  const [instagramError, setInstagramError] = useState('')
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [empresaCriada, setEmpresaCriada] = useState<EmpresaCriada | null>(null)
-  const instagramTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const instagramInputRef = useRef<HTMLInputElement | null>(null)
+  const [igProfile, setIgProfile] = useState<InstagramProfile | null>(null)
+  const [igLoading, setIgLoading] = useState(false)
+  const igLookupRef = useRef<string>('')
   const { showSuccess, showApiError } = useErrorHandler()
+
+  const lookupInstagram = useCallback(async (value: string) => {
+    const username = value.trim().replace(/^@/, '')
+    if (!username || username === igLookupRef.current) return
+    igLookupRef.current = username
+    setIgProfile(null)
+    setIgLoading(true)
+    try {
+      const res = await fetch('/api/instagram/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      const data = await res.json()
+      if (res.ok && data.status === 'ok') {
+        setIgProfile(data)
+      } else {
+        setIgProfile({ ...data, status: data.status || 'unavailable' })
+      }
+    } catch {
+      setIgProfile(null)
+    } finally {
+      setIgLoading(false)
+    }
+  }, [])
 
   const validarPlaceId = (id: string) => {
     return id.length === 27
@@ -75,69 +102,6 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
     }
   }
 
-  const verificarInstagram = async (username: string) => {
-    if (!username.trim()) {
-      setInstagramVerification(null)
-      setInstagramError('')
-      return
-    }
-
-    setInstagramLoading(true)
-    setInstagramError('')
-    setInstagramVerification(null)
-
-    try {
-      // Chamar direto o servidor do Render em vez do Vercel
-      const response = await fetch('https://verifyig.onrender.com/check/' + username, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-      })
-
-      if (!response.ok) {
-        setInstagramError('@ do usuário não encontrado.')
-        setInstagramVerification(null)
-        setInstagramLoading(false)
-        return
-      }
-
-      const data = await response.json()
-
-      if (data.success && data.exists) {
-        setInstagramVerification({
-          nome: data.nome || username,
-          seguidores: data.seguidores || 0,
-          username: data.username || username,
-        })
-        setInstagramError('')
-      } else {
-        setInstagramError('@ do usuário não encontrado.')
-        setInstagramVerification(null)
-      }
-    } catch (error) {
-      console.error('Erro ao verificar Instagram:', error)
-      setInstagramError('@ do usuário não encontrado.')
-      setInstagramVerification(null)
-    } finally {
-      setInstagramLoading(false)
-    }
-  }
-
-  const handleInstagramBlur = () => {
-    if (instagram.trim() && !instagramVerification && !instagramLoading) {
-      verificarInstagram(instagram)
-    }
-  }
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (instagramInputRef.current && !instagramInputRef.current.contains(e.target as Node)) {
-        handleInstagramBlur()
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [instagram, instagramVerification, instagramLoading])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -189,8 +153,8 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
       setInstagram('')
       setWhatsapp('')
       setErroPlaceId('')
-      setInstagramVerification(null)
-      setInstagramError('')
+      setIgProfile(null)
+      igLookupRef.current = ''
       setSelectedTheme('neon-pink')
       
       showSuccess('Página criada com sucesso!', 'Sua página já está disponível.')
@@ -321,47 +285,65 @@ export default function CriarEmpresa({ onEmpresaCriada }: CriarEmpresaProps) {
               <Instagram className="w-5 h-5 text-slate-400" />
             </div>
             <input
-              ref={instagramInputRef}
               type="text"
               value={instagram}
               onChange={(e) => {
                 setInstagram(e.target.value)
-                setInstagramVerification(null)
-                setInstagramError('')
+                setIgProfile(null)
+                igLookupRef.current = ''
               }}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-card text-slate-900 dark:text-dark-text placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onBlur={(e) => {
+                if (e.target.value.trim()) lookupInstagram(e.target.value)
+              }}
+              className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-card text-slate-900 dark:text-dark-text placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ex: @barbeariazak"
             />
-            {instagramLoading && (
+            {igLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-              </div>
-            )}
-            {instagramVerification && !instagramLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Check className="w-5 h-5 text-green-500" />
-              </div>
-            )}
-            {instagramError && !instagramLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <X className="w-5 h-5 text-red-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
               </div>
             )}
           </div>
 
-          {instagramVerification && (
-            <div className="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30">
-              <p className="text-sm font-semibold text-green-900 dark:text-green-100">
-                ✓ Nome: <span className="font-normal">{instagramVerification.nome}</span>
-              </p>
+          {/* Preview do perfil Instagram */}
+          {igProfile && igProfile.status === 'ok' && (
+            <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-green-950/40 to-emerald-950/40 border border-green-500/40 shadow-[0_0_12px_rgba(34,197,94,0.25)]">
+              {igProfile.avatarUrl ? (
+                <img
+                  src={igProfile.avatarUrl}
+                  alt={igProfile.fullName}
+                  className="w-12 h-12 rounded-full object-cover flex-shrink-0 border-2 border-green-400"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">
+                    {igProfile.fullName?.[0]?.toUpperCase() ?? '?'}
+                  </span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-green-300 truncate">{igProfile.fullName}</p>
+                <p className="text-xs text-green-500">@{igProfile.username}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Users className="w-3 h-3 text-green-400" />
+                  <span className="text-xs font-semibold text-green-400">
+                    {igProfile.followersRaw !== null
+                      ? igProfile.followersRaw >= 1_000_000
+                        ? `${Math.floor(igProfile.followersRaw / 1_000_000)}M seguidores`
+                        : igProfile.followersRaw >= 1_000
+                        ? `${Math.floor(igProfile.followersRaw / 1_000)}K seguidores`
+                        : `${igProfile.followersRaw.toLocaleString('pt-BR')} seguidores`
+                      : `${igProfile.followers} seguidores`}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
-          {instagramError && (
-            <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30">
-              <p className="text-sm font-semibold text-red-900 dark:text-red-100">
-                ✗ {instagramError}
-              </p>
+          {igProfile && igProfile.status !== 'ok' && (
+            <div className="mt-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30">
+              <p className="text-xs text-red-600 dark:text-red-400">{igProfile.error}</p>
             </div>
           )}
         </div>
