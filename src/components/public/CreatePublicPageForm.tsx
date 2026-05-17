@@ -113,7 +113,7 @@ export default function CreatePublicPageForm({ userId, onSuccess }: CreatePublic
           URL da Página *
         </label>
         <div className="flex items-center">
-          <span className="text-sm text-gray-500">rankify.com.br/p/</span>
+          <span className="text-sm text-gray-500">{process.env.NEXT_PUBLIC_APP_URL ? process.env.NEXT_PUBLIC_APP_URL.replace('https://', '') : 'rankfy.netlify.app'}/p/</span>
           <input
             type="text"
             id="slug"

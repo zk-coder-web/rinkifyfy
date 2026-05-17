@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: pagina.nome,
         description: `Conheça ${pagina.nome}. Acesse nossa página e entre em contato conosco.`,
         type: 'website',
-        url: `https://rankify.com.br/p/${pagina.slug}`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rankfy.netlify.app'}/p/${pagina.slug}`,
       },
     }
   } catch (error) {

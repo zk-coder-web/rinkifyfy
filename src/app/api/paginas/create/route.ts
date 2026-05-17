@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     db.prepare(`
       INSERT INTO notificacoes (user_id, tipo, mensagem, lida, data)
       VALUES (?, 'sucesso', ?, 0, datetime('now'))
-    `).run(userId, `Página pública "${nome}" criada com sucesso! Acesse em: rankify.com.br/p/${slug}`)
+    `).run(userId, `Página pública "${nome}" criada com sucesso! Acesse em: ${process.env.NEXT_PUBLIC_APP_URL || 'https://rankfy.netlify.app'}/p/${slug}`)
 
     return NextResponse.json(
       {
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         page: {
           id: pageId,
           slug,
-          url: `https://rankify.com.br/p/${slug}`,
+          url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rankfy.netlify.app'}/p/${slug}`,
         },
       },
       { status: 201 }
