@@ -19,7 +19,10 @@ let sqliteDb: any = null
 let vercelSql: any = null
 
 function getSqliteDb() {
-  if (!sqliteDb && !IS_VERCEL) {
+  if (IS_VERCEL) {
+    throw new Error('Tentando usar SQLite em Vercel! Use PostgreSQL.')
+  }
+  if (!sqliteDb) {
     const { getDb } = require('./db')
     sqliteDb = getDb()
   }
@@ -27,7 +30,10 @@ function getSqliteDb() {
 }
 
 async function getVercelSql() {
-  if (!vercelSql && IS_VERCEL) {
+  if (!vercelSql) {
+    if (!IS_VERCEL) {
+      throw new Error('Tentando usar PostgreSQL fora de Vercel!')
+    }
     const { sql } = await import('@vercel/postgres')
     vercelSql = sql
   }
