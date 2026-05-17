@@ -5,8 +5,8 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_APP_URL = "https://rinkify-system.netlify.app"
-  NEXT_PUBLIC_API_URL = "https://rinkify-system.netlify.app"
+  NEXT_PUBLIC_APP_URL = "https://rkfy.netlify.app"
+  NEXT_PUBLIC_API_URL = "https://rkfy.netlify.app"
   SMTP_HOST = "smtp.gmail.com"
   SMTP_PORT = "587"
   SMTP_SECURE = "false"
@@ -15,14 +15,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Configurações de função
-[functions]
-  directory = ".netlify/functions"
-  node_bundler = "esbuild"
-
-# Redirecionamentos
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200

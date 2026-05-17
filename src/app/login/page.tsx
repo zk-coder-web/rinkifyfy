@@ -34,6 +34,11 @@ function LoginPageInner() {
 
   const action = useAction({ timeoutMs: 30_000, retries: 1 })
 
+  // Determinar qual rota de autenticação usar baseado na variável de ambiente
+  const useSimpleAuth = process.env.NEXT_PUBLIC_USE_SIMPLE_AUTH === 'true'
+  const sendCodeRoute = useSimpleAuth ? '/api/auth/send-code-simple' : '/api/auth/send-code'
+  const verifyCodeRoute = useSimpleAuth ? '/api/auth/verify-code-simple' : '/api/auth/verify-code'
+
   // Handle after email verification link sent
   useEffect(() => {
     const sent = searchParams.get('sent')
@@ -166,7 +171,7 @@ function LoginPageInner() {
     const email = String(fd.get('email') || '').trim().toLowerCase()
 
     await action.run(async (signal) => {
-      await apiClient.post('/api/auth/send-code', { email }, { signal })
+      await apiClient.post(sendCodeRoute, { email }, { signal })
       setRegEmail(email)
       // Redirect to show sent page
       router.push(`/login?mode=register&sent=true&email=${encodeURIComponent(email)}`)
@@ -181,7 +186,7 @@ function LoginPageInner() {
     const code = String(fd.get('code') || '').trim()
 
     await action.run(async (signal) => {
-      await apiClient.post('/api/auth/verify-code', { email: regEmail, code }, { signal })
+      await apiClient.post(verifyCodeRoute, { email: regEmail, code }, { signal })
       setRegStep('password')
       showSuccess('E-mail verificado! Crie sua senha.')
     })
