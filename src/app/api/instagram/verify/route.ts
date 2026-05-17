@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth-vercel'
+import { getUserIdFromToken as getUserIdFromTokenVercel } from '@/lib/auth-vercel'
+import { getUserIdFromToken as getUserIdFromTokenSimple } from '@/lib/json-db-memory'
+
+// Determinar qual função de autenticação usar
+const useSimpleAuth = process.env.NEXT_PUBLIC_USE_SIMPLE_AUTH === 'true'
+
+async function getUserId(request: NextRequest): Promise<string | number | null> {
+  if (useSimpleAuth) {
+    return await getUserIdFromTokenSimple(request)
+  } else {
+    return await getUserIdFromTokenVercel(request)
+  }
+}
 
 /**
  * DEPRECATED: Esta rota é mantida apenas para compatibilidade com versões antigas.
@@ -33,7 +45,7 @@ export async function POST(request: NextRequest) {
     console.log(`[Instagram Verify] Verificando usuário: ${cleanUsername} (redirecionando para /lookup)`)
 
     // Verificar se o usuário está autenticado
-    const userId = await getUserIdFromToken(request)
+    const userId = await getUserId(request)
     if (!userId) {
       return NextResponse.json(
         { error: '@ do usuário não encontrado.' },

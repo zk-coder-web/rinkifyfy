@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserIdFromToken } from '@/lib/auth-vercel'
+import { getUserIdFromToken as getUserIdFromTokenVercel } from '@/lib/auth-vercel'
+import { getUserIdFromToken as getUserIdFromTokenSimple } from '@/lib/json-db-memory'
+
+// Determinar qual função de autenticação usar
+const useSimpleAuth = process.env.NEXT_PUBLIC_USE_SIMPLE_AUTH === 'true'
+
+async function getUserId(request: NextRequest): Promise<string | number | null> {
+  if (useSimpleAuth) {
+    return await getUserIdFromTokenSimple(request)
+  } else {
+    return await getUserIdFromTokenVercel(request)
+  }
+}
 
 export type InstagramProfile = {
   username: string
@@ -211,7 +223,7 @@ async function fetchAndParse(username: string): Promise<Parsed> {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserIdFromToken(request)
+    const userId = await getUserId(request)
     if (!userId) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
