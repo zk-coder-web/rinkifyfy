@@ -17,8 +17,14 @@ const IS_VERCEL = !!(
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
-// Em produção (Vercel), usar memória. Localmente, usar arquivo.
-const DB_PATH = IS_VERCEL ? ':memory:' : path.join(process.cwd(), 'rankify.db')
+// Usar DATABASE_URL se disponível, senão usar arquivo local
+// DATABASE_URL pode ser: file:./rankify.db ou :memory:
+let DB_PATH = process.env.DATABASE_URL || path.join(process.cwd(), 'rankify.db')
+
+// Se DATABASE_URL começa com "file:", remover o prefixo
+if (DB_PATH.startsWith('file:')) {
+  DB_PATH = DB_PATH.replace('file:', '')
+}
 
 console.log('[DB] Inicializando banco de dados:', {
   environment: IS_VERCEL ? 'Vercel (serverless)' : 'Local',
