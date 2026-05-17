@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { generateCode, saveCode, getUserByEmail, createUser } from '@/lib/json-db'
+import { generateCode, saveCode, getUserByEmail, createUser } from '@/lib/json-db-memory'
 import { sendWelcomeEmail } from '@/lib/mailer'
 
 export async function POST(req: NextRequest) {

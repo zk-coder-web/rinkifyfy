@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyCode, getUserByEmail } from '@/lib/json-db'
+import { verifyCode, getUserByEmail } from '@/lib/json-db-memory'
 
 export async function POST(req: NextRequest) {
   try {

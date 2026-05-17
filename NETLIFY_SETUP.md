@@ -55,3 +55,29 @@ Após o deploy, teste as rotas:
 - As variáveis DEVEM estar configuradas no painel do Netlify
 - Variáveis que começam com `NEXT_PUBLIC_` são expostas no frontend
 - Outras variáveis são apenas para o backend (API routes)
+
+## ⚠️ LIMITAÇÃO IMPORTANTE: Armazenamento em Memória
+
+**ATENÇÃO:** A versão simplificada (`send-code-simple` e `verify-code-simple`) usa armazenamento em **memória temporária**.
+
+### O que isso significa:
+- ✅ Funciona para testes e desenvolvimento
+- ❌ Os códigos de verificação são perdidos quando a função serverless é reiniciada
+- ❌ Não é adequado para produção com muitos usuários
+
+### Quando os dados são perdidos:
+- Quando o Netlify reinicia as funções serverless (após alguns minutos de inatividade)
+- Quando você faz um novo deploy
+- Quando há um cold start da função
+
+### Solução para Produção:
+Para um ambiente de produção real, você precisa usar um banco de dados persistente:
+- **Supabase** (PostgreSQL gratuito)
+- **MongoDB Atlas** (NoSQL gratuito)
+- **PlanetScale** (MySQL gratuito)
+- **Vercel Postgres** (se migrar para Vercel)
+
+### Como funciona agora:
+1. Usuário solicita código → código é salvo na memória
+2. Usuário verifica código → se a função ainda estiver "quente", funciona
+3. Se a função for reiniciada → código é perdido e usuário precisa solicitar novo código
