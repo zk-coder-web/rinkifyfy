@@ -87,11 +87,15 @@ function migrate(db: Database.Database) {
       );
 
       CREATE TABLE IF NOT EXISTS sessions (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        token      TEXT    NOT NULL UNIQUE,
-        expires_at TEXT    NOT NULL,
-        created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token        TEXT    NOT NULL UNIQUE,
+        refresh_token TEXT   NOT NULL UNIQUE,
+        device_info  TEXT,
+        ip_address   TEXT,
+        expires_at   TEXT    NOT NULL,
+        last_active  TEXT    NOT NULL DEFAULT (datetime('now')),
+        created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
       );
 
       CREATE TABLE IF NOT EXISTS notif_read (
@@ -164,6 +168,12 @@ function migrate(db: Database.Database) {
     safeAlter(`ALTER TABLE paginas ADD COLUMN foto_url TEXT`)
     safeAlter(`ALTER TABLE paginas ADD COLUMN foto_rotacao REAL DEFAULT 0`)
     safeAlter(`ALTER TABLE paginas ADD COLUMN mostrar_foto INTEGER DEFAULT 0`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN refresh_token TEXT UNIQUE`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN device_info TEXT`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN ip_address TEXT`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN last_active TEXT DEFAULT (datetime('now'))`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN created_at TEXT DEFAULT (datetime('now'))`)
+    safeAlter(`ALTER TABLE sessions ADD COLUMN expires_at TEXT`)
   } catch (error: any) {
     console.error('[DB] Erro durante migração:', error.message)
     throw error
