@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       // Create placeholder user (will set password later)
       console.log('[verify-token] Criando novo usuário placeholder')
       const displayName = email.split('@')[0]
-      await createLocalUser(email, '', displayName, null)
+      await createLocalUser(email, '', displayName, undefined)
       await markUserVerified(email)
       log('info', 'verify-token', `New verified user created: ${email}`)
     }
