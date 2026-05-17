@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { generateCode, saveCode, getUserByEmail, createUser } from '@/lib/json-db-memory'
-import { sendWelcomeEmail } from '@/lib/mailer'
+import { sendVerificationEmail } from '@/lib/mailer'
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
     saveCode(email, code)
     console.log('[send-code-simple] Código gerado:', code)
 
-    // Enviar email
+    // Enviar email com código apenas (sem link de verificação)
     try {
-      await sendWelcomeEmail(email, '', code)
+      await sendVerificationEmail(email, code)
       console.log('[send-code-simple] Email enviado com sucesso')
     } catch (emailError: any) {
       console.error('[send-code-simple] Erro ao enviar email:', emailError.message)

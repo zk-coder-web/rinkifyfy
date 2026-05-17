@@ -173,8 +173,14 @@ function LoginPageInner() {
     await action.run(async (signal) => {
       await apiClient.post(sendCodeRoute, { email }, { signal })
       setRegEmail(email)
-      // Redirect to show sent page
-      router.push(`/login?mode=register&sent=true&email=${encodeURIComponent(email)}`)
+      // Para versão simplificada, ir direto para tela de verificação de código
+      if (useSimpleAuth) {
+        setRegStep('verify')
+        showSuccess('Código enviado! Verifique seu e-mail.')
+      } else {
+        // Versão completa redireciona para página "sent"
+        router.push(`/login?mode=register&sent=true&email=${encodeURIComponent(email)}`)
+      }
     })
   }
 
@@ -186,9 +192,22 @@ function LoginPageInner() {
     const code = String(fd.get('code') || '').trim()
 
     await action.run(async (signal) => {
-      await apiClient.post(verifyCodeRoute, { email: regEmail, code }, { signal })
-      setRegStep('password')
-      showSuccess('E-mail verificado! Crie sua senha.')
+      // Para versão simplificada, verificar código e fazer login direto
+      if (useSimpleAuth) {
+        const data = await apiClient.post<{ user: Parameters<typeof setSession>[0] }>(
+          verifyCodeRoute,
+          { email: regEmail, code },
+          { signal }
+        )
+        setSession(data.user)
+        showSuccess('Código verificado! Bem-vindo!')
+        router.replace('/dashboard')
+      } else {
+        // Versão completa vai para tela de criar senha
+        await apiClient.post(verifyCodeRoute, { email: regEmail, code }, { signal })
+        setRegStep('password')
+        showSuccess('E-mail verificado! Crie sua senha.')
+      }
     })
   }
 
@@ -432,28 +451,19 @@ function LoginForm({
                   <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-bold text-blue-900 dark:text-blue-200">
-                      Verifique sua caixa de entrada
+                      Código enviado!
                     </p>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      Enviamos um link de verificação para{' '}
+                      Enviamos um código de 6 dígitos para{' '}
                       <strong>{regEmail}</strong>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200 dark:border-dark-border"></div>
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white dark:bg-dark-card px-2 text-slate-400">ou</span>
-                </div>
-              </div>
-
               <form onSubmit={onSubmitVerifyCode} className="space-y-3">
                 <p className="text-xs font-semibold text-slate-500 dark:text-dark-muted">
-                  Já verificou? Insira o código recebido (alternativo)
+                  Digite o código recebido no seu e-mail
                 </p>
                 <Field name="code" type="text" label="Código de verificação" placeholder="000000" icon="email" disabled={loading} />
                 <SubmitBtn loading={loading} label="Verificar código" loadingLabel="Verificando..." icon={<CheckCircle className="h-4 w-4" />} />
@@ -461,7 +471,7 @@ function LoginForm({
 
               <button type="button" disabled={loading} onClick={onResendCode}
                 className="w-full text-center text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400 disabled:opacity-50">
-                Não recebi o link — reenviar
+                Não recebi o código — reenviar
               </button>
             </div>
           )}
