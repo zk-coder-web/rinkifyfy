@@ -17,6 +17,11 @@ https://rinkifyfy-verify.vercel.app
 
 Copie e cole cada variável abaixo no painel da Vercel:
 
+#### Detecção de Ambiente
+```
+VERCEL = 1
+```
+
 #### URLs (Públicas)
 ```
 NEXT_PUBLIC_API_URL = https://rinkifyfy-verify.vercel.app
