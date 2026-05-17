@@ -38,11 +38,6 @@ const nextConfig = {
     }
     return config
   },
-  // Excluir pastas de projetos externos do build
-  exclude: [
-    'profile-spy-light-main',
-    'verificarUser',
-  ],
 };
 
 module.exports = nextConfig;
