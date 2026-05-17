@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyCode, getUserByEmail } from '@/lib/json-db-memory'
+import { verifyCode, getUserByEmail, saveToken } from '@/lib/json-db-memory'
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,6 +46,9 @@ export async function POST(req: NextRequest) {
 
     // Gerar token simples (apenas para exemplo)
     const token = `token_${Date.now()}_${Math.random().toString(36).substring(7)}`
+    
+    // Salvar token no armazenamento em memória
+    saveToken(token, user.id, user.email)
 
     // Retornar resposta com token
     const response = NextResponse.json({
