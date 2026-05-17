@@ -11,19 +11,26 @@ const IS_VERCEL = !!(
   process.env.VERCEL_REGION
 )
 
+const IS_NETLIFY = !!(
+  process.env.NETLIFY === 'true' ||
+  process.env.NETLIFY_DEV ||
+  process.env.CONTEXT
+)
+
 // Importação condicional de better-sqlite3
 let Database: any = null
-if (!IS_VERCEL) {
+if (!IS_VERCEL && !IS_NETLIFY) {
   try {
     Database = require('better-sqlite3')
   } catch (error) {
-    console.warn('[DB] better-sqlite3 não disponível (esperado no Vercel)')
+    console.warn('[DB] better-sqlite3 não disponível (esperado no Vercel/Netlify)')
   }
 }
 
 console.log('[DB] Inicializando banco de dados:', {
-  environment: IS_VERCEL ? 'Vercel (PostgreSQL/Neon)' : 'Local (SQLite)',
+  environment: IS_VERCEL ? 'Vercel (PostgreSQL/Neon)' : IS_NETLIFY ? 'Netlify (SQLite)' : 'Local (SQLite)',
   vercelDetected: IS_VERCEL,
+  netlifyDetected: IS_NETLIFY,
 })
 
 let _db: any = null
@@ -36,6 +43,37 @@ export function getDb(): any {
       'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. ' +
       'Importe de auth-vercel.ts em vez de auth.ts'
     )
+  }
+  
+  // No Netlify, usar SQLite em /tmp (efêmero mas funcional)
+  if (IS_NETLIFY) {
+    if (!Database) {
+      // Tentar importar dinamicamente
+      try {
+        Database = require('better-sqlite3')
+      } catch (error) {
+        throw new Error('better-sqlite3 não está disponível no Netlify. Verifique se está instalado.')
+      }
+    }
+    
+    if (!_db) {
+      try {
+        // No Netlify, usar /tmp para banco de dados (será recriado a cada deploy)
+        const DB_PATH = '/tmp/rankify.db'
+        _db = new Database(DB_PATH)
+        _db.pragma('journal_mode = WAL')
+        _db.pragma('foreign_keys = ON')
+        _db.pragma('busy_timeout = 5000')
+        
+        console.log('[DB] Banco SQLite inicializado no Netlify (/tmp/rankify.db)')
+        migrate(_db)
+      } catch (error: any) {
+        console.error('[DB] Erro ao inicializar banco de dados no Netlify:', error.message)
+        console.error('[DB] Stack:', error.stack)
+        throw error
+      }
+    }
+    return _db
   }
   
   if (!Database) {
