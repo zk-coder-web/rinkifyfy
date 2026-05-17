@@ -4,8 +4,7 @@
  * Uses DELETE method for idempotency and proper semantics.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, deleteSession } from '@/lib/auth-vercel'
-import { getDb } from '@/lib/db'
+import { getSessionUser, deleteSession, executeUpdate } from '@/lib/auth-vercel'
 import { log } from '@/lib/stability'
 
 export async function DELETE(req: NextRequest) {
@@ -15,41 +14,34 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const db = getDb()
     const userId = sessionUser.id
     const email = sessionUser.email
 
-    // Start a transaction for atomic deletion
-    const deleteAll = db.transaction(() => {
-      // Delete all user-related data in correct order (respecting foreign keys)
-      
-      // 1. Delete user's notifications
-      db.prepare('DELETE FROM notificacoes WHERE user_id = ?').run(userId)
-      
-      // 2. Delete read notification records
-      db.prepare('DELETE FROM notif_read WHERE user_id = ?').run(userId)
-      
-      // 3. Delete user's pages (this will cascade to any related data)
-      db.prepare('DELETE FROM paginas WHERE user_id = ?').run(userId)
-      
-      // 4. Delete verification codes
-      db.prepare('DELETE FROM verify_codes WHERE email = ?').run(email)
-      
-      // 5. Delete verification tokens
-      db.prepare('DELETE FROM verify_tokens WHERE email = ?').run(email)
-      
-      // 6. Delete pending PINs
-      db.prepare('DELETE FROM pending_pins WHERE email = ?').run(email)
-      
-      // 7. Delete all sessions for this user
-      db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId)
-      
-      // 8. Finally, delete the user
-      db.prepare('DELETE FROM users WHERE id = ?').run(userId)
-    })
-
-    // Execute the transaction
-    deleteAll()
+    // Delete all user-related data in correct order (respecting foreign keys)
+    
+    // 1. Delete user's notifications
+    await executeUpdate('DELETE FROM notificacoes WHERE user_id = ?', [userId])
+    
+    // 2. Delete read notification records
+    await executeUpdate('DELETE FROM notif_read WHERE user_id = ?', [userId])
+    
+    // 3. Delete user's pages (this will cascade to any related data)
+    await executeUpdate('DELETE FROM paginas WHERE user_id = ?', [userId])
+    
+    // 4. Delete verification codes
+    await executeUpdate('DELETE FROM verify_codes WHERE email = ?', [email])
+    
+    // 5. Delete verification tokens
+    await executeUpdate('DELETE FROM verify_tokens WHERE email = ?', [email])
+    
+    // 6. Delete pending PINs
+    await executeUpdate('DELETE FROM pending_pins WHERE email = ?', [email])
+    
+    // 7. Delete all sessions for this user
+    await executeUpdate('DELETE FROM sessions WHERE user_id = ?', [userId])
+    
+    // 8. Finally, delete the user
+    await executeUpdate('DELETE FROM users WHERE id = ?', [userId])
 
     // Clear the session cookie
     const response = NextResponse.json({ 

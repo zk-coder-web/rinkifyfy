@@ -653,3 +653,106 @@ export function getAllUserPreferences(userId: number): Record<string, string> {
 export function deleteUserPreference(userId: number, key: string): void {
   // Implementar se necessário
 }
+
+/**
+ * Função genérica para executar queries no banco
+ * Funciona com SQLite e PostgreSQL
+ */
+export async function executeQuery(query: string, params: any[] = []): Promise<any[]> {
+  try {
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      // Converter placeholders ? para $1, $2, etc.
+      let pgQuery = query
+      let paramIndex = 1
+      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`)
+      
+      // Substituir datetime('now') por NOW()
+      pgQuery = pgQuery.replace(/datetime\('now'\)/g, "NOW()")
+      
+      const result = await sql.query(pgQuery, params)
+      return result.rows
+    } else {
+      const db = getSqliteDb()
+      return db.prepare(query).all(...params)
+    }
+  } catch (error) {
+    console.error('Erro ao executar query:', error)
+    throw error
+  }
+}
+
+/**
+ * Função genérica para executar query e retornar uma linha
+ */
+export async function executeQueryOne(query: string, params: any[] = []): Promise<any | undefined> {
+  try {
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      // Converter placeholders ? para $1, $2, etc.
+      let pgQuery = query
+      let paramIndex = 1
+      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`)
+      
+      // Substituir datetime('now') por NOW()
+      pgQuery = pgQuery.replace(/datetime\('now'\)/g, "NOW()")
+      
+      // Adicionar LIMIT 1 se não existir
+      if (!pgQuery.toLowerCase().includes('limit')) {
+        pgQuery += ' LIMIT 1'
+      }
+      
+      const result = await sql.query(pgQuery, params)
+      return result.rows[0]
+    } else {
+      const db = getSqliteDb()
+      return db.prepare(query).get(...params)
+    }
+  } catch (error) {
+    console.error('Erro ao executar query:', error)
+    throw error
+  }
+}
+
+/**
+ * Função genérica para executar INSERT/UPDATE/DELETE
+ */
+export async function executeUpdate(query: string, params: any[] = []): Promise<{ lastInsertRowid?: number; changes?: number }> {
+  try {
+    if (IS_VERCEL) {
+      const sql = await getVercelSql()
+      // Converter placeholders ? para $1, $2, etc.
+      let pgQuery = query
+      let paramIndex = 1
+      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`)
+      
+      // Substituir datetime('now') por NOW()
+      pgQuery = pgQuery.replace(/datetime\('now'\)/g, "NOW()")
+      
+      // Se for INSERT, adicionar RETURNING id
+      if (pgQuery.trim().toLowerCase().startsWith('insert')) {
+        if (!pgQuery.toLowerCase().includes('returning')) {
+          pgQuery += ' RETURNING id'
+        }
+        const result = await sql.query(pgQuery, params)
+        return { 
+          lastInsertRowid: result.rows[0]?.id,
+          changes: result.rowCount || 0
+        }
+      } else {
+        const result = await sql.query(pgQuery, params)
+        return { changes: result.rowCount || 0 }
+      }
+    } else {
+      const db = getSqliteDb()
+      const result = db.prepare(query).run(...params)
+      return {
+        lastInsertRowid: result.lastInsertRowid as number,
+        changes: result.changes
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao executar update:', error)
+    throw error
+  }
+}
