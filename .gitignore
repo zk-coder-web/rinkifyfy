@@ -52,3 +52,5 @@ node_modules
 # Pastas de projetos externos
 profile-spy-light-main/
 verificarUser/
+.vercel
+.env*.local

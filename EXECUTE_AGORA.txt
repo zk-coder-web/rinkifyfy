@@ -1,0 +1,52 @@
+╔════════════════════════════════════════════════════════════════╗
+║                    🚨 EXECUTE AGORA! 🚨                       ║
+║                                                                ║
+║  As tabelas do banco de dados NÃO foram criadas!             ║
+║  Erro: relation "pending_pins" does not exist                ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+SOLUÇÃO RÁPIDA (1 minuto):
+
+1. Abra um terminal na pasta do projeto:
+   cd rankup-next
+
+2. Execute um dos comandos abaixo:
+
+   OPÇÃO A (Recomendado):
+   npm run create-postgres-schema
+
+   OPÇÃO B (Alternativa):
+   node scripts/create-postgres-schema.js
+
+3. Aguarde a mensagem:
+   ✅ Schema criado com sucesso!
+
+4. Pronto! O sistema vai funcionar agora.
+
+═══════════════════════════════════════════════════════════════
+
+ALTERNATIVA (Se o script não funcionar):
+
+1. Acesse: https://console.neon.tech
+2. Selecione: rankify-db
+3. Vá em: SQL Editor
+4. Abra o arquivo: schema-postgres.sql
+5. Copie TODO o conteúdo
+6. Cole no SQL Editor do Neon
+7. Clique: Run
+8. Aguarde: ✅ Schema criado com sucesso!
+
+═══════════════════════════════════════════════════════════════
+
+DEPOIS:
+
+1. Faça redeploy no Vercel
+2. Teste: curl -X POST https://rinkifyfy-verify.vercel.app/api/auth/send-code \
+   -H "Content-Type: application/json" \
+   -d '{"email":"seu-email@gmail.com"}'
+3. Verifique se recebeu o email
+
+═══════════════════════════════════════════════════════════════
+
+Dúvidas? Leia: CRIAR_TABELAS_AGORA.md
