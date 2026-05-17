@@ -1,5 +1,5 @@
 [build]
-  command = "rm -rf .next && rm -rf node_modules/.cache && npm run build"
+  command = "npm install && rm -rf .next && rm -rf node_modules/.cache && npm run build"
   publish = ".next"
 
 [build.environment]
