@@ -1,12 +1,12 @@
 /**
- * POST /api/reset-db
+ * POST /api/reset-db ou GET /api/reset-db?confirm=true
  * CUIDADO: Apaga TODOS os dados do banco!
  * Use apenas em desenvolvimento/testes
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { execute } from '@/lib/db-postgres'
 
-export async function POST(req: NextRequest) {
+async function resetDatabase() {
   try {
     // Verificar se tem DATABASE_URL (só funciona com PostgreSQL)
     if (!process.env.DATABASE_URL) {
@@ -56,4 +56,22 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+export async function POST(req: NextRequest) {
+  return resetDatabase()
+}
+
+export async function GET(req: NextRequest) {
+  const confirm = req.nextUrl.searchParams.get('confirm')
+  
+  if (confirm !== 'true') {
+    return NextResponse.json({
+      error: 'Confirmação necessária',
+      message: 'Adicione ?confirm=true na URL para resetar o banco',
+      example: 'https://rkfy.netlify.app/api/reset-db?confirm=true'
+    }, { status: 400 })
+  }
+  
+  return resetDatabase()
 }
