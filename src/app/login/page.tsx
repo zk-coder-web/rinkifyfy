@@ -185,22 +185,10 @@ function LoginPageInner() {
     const code = String(fd.get('code') || '').trim()
 
     await action.run(async (signal) => {
-      // Para versão simplificada, verificar código e fazer login direto
-      if (useSimpleAuth) {
-        const data = await apiClient.post<{ user: Parameters<typeof setSession>[0] }>(
-          verifyCodeRoute,
-          { email: regEmail, code },
-          { signal }
-        )
-        setSession(data.user)
-        showSuccess('Código verificado! Bem-vindo!')
-        router.replace('/dashboard')
-      } else {
-        // Versão completa vai para tela de criar senha
-        await apiClient.post(verifyCodeRoute, { email: regEmail, code }, { signal })
-        setRegStep('password')
-        showSuccess('E-mail verificado! Crie sua senha.')
-      }
+      // Verificar código e ir para tela de criar senha
+      await apiClient.post(verifyCodeRoute, { email: regEmail, code }, { signal })
+      setRegStep('password')
+      showSuccess('E-mail verificado! Crie sua senha.')
     })
   }
 
