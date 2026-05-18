@@ -120,6 +120,75 @@ function ConfirmModal({ title, description, confirmLabel, danger, onConfirm, onC
   )
 }
 
+/* ── Delete Account Modal with Text Confirmation ── */
+function DeleteAccountModal({ onConfirm, onCancel }: {
+  onConfirm: () => void; onCancel: () => void
+}) {
+  const [confirmText, setConfirmText] = useState('')
+  const isValid = confirmText === 'remove-project'
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-dark-card border border-red-200 dark:border-red-900/40 p-6 shadow-2xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-dark-text">Excluir Projeto</h3>
+            <p className="text-xs text-red-600 dark:text-red-400 font-semibold">Esta ação é irreversível</p>
+          </div>
+        </div>
+        
+        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 rounded-xl p-4 mb-4">
+          <p className="text-sm text-red-800 dark:text-red-300 font-medium leading-relaxed">
+            Todos os seus dados serão permanentemente removidos:
+          </p>
+          <ul className="mt-2 space-y-1 text-xs text-red-700 dark:text-red-400">
+            <li>• Conta e informações pessoais</li>
+            <li>• Todas as páginas criadas</li>
+            <li>• Estatísticas e cliques</li>
+            <li>• Notificações e preferências</li>
+          </ul>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-bold text-slate-700 dark:text-dark-text mb-2">
+            Confirme com <span className="text-red-600 dark:text-red-400 font-mono">"remove-project"</span> para excluir este projeto.
+          </label>
+          <input
+            type="text"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="Digite: remove-project"
+            className="w-full px-4 py-3 bg-white dark:bg-dark-bg border-2 border-slate-200 dark:border-dark-border rounded-xl text-sm font-mono text-slate-900 dark:text-dark-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <button 
+            onClick={onCancel} 
+            className="flex-1 rounded-xl border border-slate-200 dark:border-dark-border py-3 text-sm font-bold text-slate-600 dark:text-dark-muted hover:bg-slate-50 dark:hover:bg-dark-bg transition"
+          >
+            Cancelar
+          </button>
+          <button 
+            onClick={onConfirm}
+            disabled={!isValid}
+            className={`flex-1 rounded-xl py-3 text-sm font-black text-white transition ${
+              isValid 
+                ? 'bg-red-600 hover:bg-red-700 cursor-pointer' 
+                : 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed opacity-50'
+            }`}
+          >
+            Excluir Permanentemente
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Page ── */
 export default function ConfiguracoesPage() {
   const { logout } = useAuth()
@@ -210,8 +279,7 @@ export default function ConfiguracoesPage() {
           confirmLabel="Sair" onConfirm={handleLogout} onCancel={() => setShowLogoutConfirm(false)} />
       )}
       {showDeleteConfirm && (
-        <ConfirmModal title="Deletar conta" description="Esta ação é irreversível. Todos os seus dados serão removidos."
-          confirmLabel="Deletar" danger onConfirm={handleDeleteAccount} onCancel={() => setShowDeleteConfirm(false)} />
+        <DeleteAccountModal onConfirm={handleDeleteAccount} onCancel={() => setShowDeleteConfirm(false)} />
       )}
 
       <AppShell title="Perfil">
