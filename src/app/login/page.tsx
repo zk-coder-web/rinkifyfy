@@ -172,14 +172,8 @@ function LoginPageInner() {
     await action.run(async (signal) => {
       await apiClient.post(sendCodeRoute, { email }, { signal })
       setRegEmail(email)
-      // Para versão simplificada, ir direto para tela de verificação de código
-      if (useSimpleAuth) {
-        setRegStep('verify')
-        showSuccess('Código enviado! Verifique seu e-mail.')
-      } else {
-        // Versão completa redireciona para página "sent"
-        router.push(`/login?mode=register&sent=true&email=${encodeURIComponent(email)}`)
-      }
+      // Redireciona para página "sent"
+      router.push(`/login?mode=register&sent=true&email=${encodeURIComponent(email)}`)
     })
   }
 
