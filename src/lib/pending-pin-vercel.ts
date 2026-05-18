@@ -1,24 +1,20 @@
 /**
- * Pending PIN store — Funciona com SQLite (local) e PostgreSQL (Vercel)
+ * Pending PIN store — Funciona com SQLite (local) e PostgreSQL (Netlify/Vercel)
  * TTL: 30 minutes (same as verify code window).
  */
 
-const IS_VERCEL = !!(
-  process.env.VERCEL === '1' ||
-  process.env.VERCEL_ENV ||
-  process.env.VERCEL_URL ||
-  process.env.VERCEL_REGION
-)
+// Detectar se deve usar PostgreSQL (Netlify ou Vercel)
+const USE_POSTGRES = !!process.env.DATABASE_URL
 
 const TTL_MS = 30 * 60 * 1000 // 30 min
 
 // Lazy load dos drivers
 let sqliteDb: any = null
-let vercelSql: any = null
+let postgresClient: any = null
 
 function getSqliteDb() {
-  if (IS_VERCEL) {
-    throw new Error('Tentando usar SQLite em Vercel!')
+  if (USE_POSTGRES) {
+    throw new Error('Tentando usar SQLite com DATABASE_URL configurada!')
   }
   if (!sqliteDb) {
     const { getDb } = require('./db')
@@ -27,49 +23,51 @@ function getSqliteDb() {
   return sqliteDb
 }
 
-async function getVercelSql() {
-  if (!vercelSql) {
-    if (!IS_VERCEL) {
-      throw new Error('Tentando usar PostgreSQL fora de Vercel!')
+async function getPostgresClient() {
+  if (!postgresClient) {
+    if (!USE_POSTGRES) {
+      throw new Error('Tentando usar PostgreSQL sem DATABASE_URL!')
     }
-    const { sql } = await import('@vercel/postgres')
-    vercelSql = sql
+    const { query, execute } = await import('./db-postgres')
+    postgresClient = { query, execute }
   }
-  return vercelSql
+  return postgresClient
 }
 
 export async function savePendingPin(email: string, pin: string): Promise<void> {
-  const expiresAt = new Date(Date.now() + TTL_MS).toISOString()
+  const expiresAt = new Date(Date.now() + TTL_MS)
   
-  if (IS_VERCEL) {
-    const sql = await getVercelSql()
-    await sql`
-      INSERT INTO pending_pins (email, pin, expires_at)
-      VALUES (${email.toLowerCase()}, ${pin}, ${expiresAt})
-      ON CONFLICT(email) DO UPDATE SET pin = EXCLUDED.pin, expires_at = EXCLUDED.expires_at
-    `
+  if (USE_POSTGRES) {
+    const pg = await getPostgresClient()
+    await pg.execute(
+      `INSERT INTO pending_pins (email, pin, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT(email) DO UPDATE SET pin = EXCLUDED.pin, expires_at = EXCLUDED.expires_at`,
+      [email.toLowerCase(), pin, expiresAt]
+    )
   } else {
     const db = getSqliteDb()
     db.prepare(
       `INSERT INTO pending_pins (email, pin, expires_at)
        VALUES (?, ?, ?)
        ON CONFLICT(email) DO UPDATE SET pin = excluded.pin, expires_at = excluded.expires_at`
-    ).run(email.toLowerCase(), pin, expiresAt)
+    ).run(email.toLowerCase(), pin, expiresAt.toISOString())
   }
 }
 
 export async function getPendingPin(email: string): Promise<string | null> {
-  if (IS_VERCEL) {
-    const sql = await getVercelSql()
-    const result = await sql`
-      SELECT pin, expires_at FROM pending_pins WHERE LOWER(email) = LOWER(${email}) LIMIT 1
-    `
+  if (USE_POSTGRES) {
+    const pg = await getPostgresClient()
+    const rows = await pg.query(
+      `SELECT pin, expires_at FROM pending_pins WHERE LOWER(email) = LOWER($1) LIMIT 1`,
+      [email]
+    )
     
-    if (result.rows.length === 0) return null
+    if (rows.length === 0) return null
     
-    const row = result.rows[0] as { pin: string; expires_at: string }
+    const row = rows[0] as { pin: string; expires_at: Date }
     if (new Date(row.expires_at) < new Date()) {
-      await sql`DELETE FROM pending_pins WHERE LOWER(email) = LOWER(${email})`
+      await pg.execute(`DELETE FROM pending_pins WHERE LOWER(email) = LOWER($1)`, [email])
       return null
     }
     return row.pin
@@ -89,9 +87,9 @@ export async function getPendingPin(email: string): Promise<string | null> {
 }
 
 export async function clearPendingPin(email: string): Promise<void> {
-  if (IS_VERCEL) {
-    const sql = await getVercelSql()
-    await sql`DELETE FROM pending_pins WHERE LOWER(email) = LOWER(${email})`
+  if (USE_POSTGRES) {
+    const pg = await getPostgresClient()
+    await pg.execute(`DELETE FROM pending_pins WHERE LOWER(email) = LOWER($1)`, [email])
   } else {
     const db = getSqliteDb()
     db.prepare(`DELETE FROM pending_pins WHERE email = ?`).run(email.toLowerCase())
@@ -100,12 +98,12 @@ export async function clearPendingPin(email: string): Promise<void> {
 
 /** Housekeeping — call occasionally to remove expired rows */
 export function purgeExpiredPins(): void {
-  if (IS_VERCEL) {
-    // No Vercel, fazer de forma assíncrona
+  if (USE_POSTGRES) {
+    // No PostgreSQL, fazer de forma assíncrona
     (async () => {
       try {
-        const sql = await getVercelSql()
-        await sql`DELETE FROM pending_pins WHERE expires_at < NOW()`
+        const pg = await getPostgresClient()
+        await pg.execute(`DELETE FROM pending_pins WHERE expires_at < NOW()`, [])
       } catch (error) {
         console.error('Erro ao purgar PINs expirados:', error)
       }
