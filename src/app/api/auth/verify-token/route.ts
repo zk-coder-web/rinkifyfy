@@ -3,7 +3,7 @@
  * Verifies user email via token and returns JSON (for verify page)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { consumeVerifyToken, getUserByEmail, markUserVerified, createLocalUser } from '@/lib/auth'
+import { consumeVerifyToken, getUserByEmail, markUserVerified, createLocalUser } from '@/lib/auth-adapter'
 import { log } from '@/lib/stability'
 
 export async function GET(req: NextRequest) {

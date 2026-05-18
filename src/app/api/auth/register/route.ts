@@ -17,7 +17,7 @@ import {
   updateUserPassword,
   updateUserPin,
   markUserVerified,
-} from '@/lib/auth'
+} from '@/lib/auth-adapter'
 import { getPendingPin, clearPendingPin } from '@/lib/pending-pin-vercel'
 import { log } from '@/lib/stability'
 import { sendWelcomeUserEmail } from '@/lib/mailer'

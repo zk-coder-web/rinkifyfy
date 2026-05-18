@@ -4,7 +4,7 @@
  * Verifies the user's security PIN (requires active session).
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, verifyUserPin } from '@/lib/auth'
+import { getSessionUser, verifyUserPin } from '@/lib/auth-adapter'
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get('rankify_session')?.value

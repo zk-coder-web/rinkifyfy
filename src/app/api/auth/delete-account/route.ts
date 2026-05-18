@@ -4,7 +4,7 @@
  * Uses DELETE method for idempotency and proper semantics.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser, deleteSession, executeUpdate } from '@/lib/auth'
+import { getSessionUser, deleteSession, executeUpdate } from '@/lib/auth-adapter'
 import { log } from '@/lib/stability'
 
 export async function DELETE(req: NextRequest) {

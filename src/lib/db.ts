@@ -1,5 +1,5 @@
 /**
- * Database router — SQLite local, PostgreSQL (Neon) em Vercel
+ * Database router — SQLite local, PostgreSQL (Neon) em produção
  * Detecta automaticamente o ambiente e usa o driver apropriado
  */
 import path from 'path'
@@ -17,18 +17,22 @@ const IS_NETLIFY = !!(
   process.env.CONTEXT
 )
 
+// Se tem DATABASE_URL, usar PostgreSQL
+const USE_POSTGRES = !!process.env.DATABASE_URL
+
 // Importação condicional de better-sqlite3
 let Database: any = null
-if (!IS_VERCEL && !IS_NETLIFY) {
+if (!USE_POSTGRES && !IS_VERCEL && !IS_NETLIFY) {
   try {
     Database = require('better-sqlite3')
   } catch (error) {
-    console.warn('[DB] better-sqlite3 não disponível (esperado no Vercel/Netlify)')
+    console.warn('[DB] better-sqlite3 não disponível')
   }
 }
 
 console.log('[DB] Inicializando banco de dados:', {
-  environment: IS_VERCEL ? 'Vercel (PostgreSQL/Neon)' : IS_NETLIFY ? 'Netlify (SQLite)' : 'Local (SQLite)',
+  environment: USE_POSTGRES ? 'PostgreSQL (Neon)' : IS_VERCEL ? 'Vercel' : IS_NETLIFY ? 'Netlify (SQLite)' : 'Local (SQLite)',
+  usePostgres: USE_POSTGRES,
   vercelDetected: IS_VERCEL,
   netlifyDetected: IS_NETLIFY,
 })
@@ -36,29 +40,32 @@ console.log('[DB] Inicializando banco de dados:', {
 let _db: any = null
 
 export function getDb(): any {
-  if (IS_VERCEL) {
-    // Em Vercel, não usar SQLite
-    // As funções de auth devem usar @vercel/postgres diretamente
+  // Se usar PostgreSQL, lançar erro para usar db-postgres.ts
+  if (USE_POSTGRES) {
     throw new Error(
-      'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3. ' +
-      'Importe de auth-vercel.ts em vez de auth.ts'
+      'DATABASE_URL detectada! Use as funções de @/lib/db-postgres em vez de getDb(). ' +
+      'As funções de auth precisam ser migradas para PostgreSQL.'
     )
   }
   
-  // No Netlify, usar SQLite em /tmp (efêmero mas funcional)
+  if (IS_VERCEL) {
+    throw new Error(
+      'Você está em Vercel! Use @vercel/postgres em vez de better-sqlite3.'
+    )
+  }
+  
+  // No Netlify sem DATABASE_URL, usar SQLite em /tmp
   if (IS_NETLIFY) {
     if (!Database) {
-      // Tentar importar dinamicamente
       try {
         Database = require('better-sqlite3')
       } catch (error) {
-        throw new Error('better-sqlite3 não está disponível no Netlify. Verifique se está instalado.')
+        throw new Error('better-sqlite3 não está disponível no Netlify.')
       }
     }
     
     if (!_db) {
       try {
-        // No Netlify, usar /tmp para banco de dados (será recriado a cada deploy)
         const DB_PATH = '/tmp/rankify.db'
         _db = new Database(DB_PATH)
         _db.pragma('journal_mode = WAL')
@@ -69,7 +76,6 @@ export function getDb(): any {
         migrate(_db)
       } catch (error: any) {
         console.error('[DB] Erro ao inicializar banco de dados no Netlify:', error.message)
-        console.error('[DB] Stack:', error.stack)
         throw error
       }
     }
@@ -92,7 +98,6 @@ export function getDb(): any {
       migrate(_db)
     } catch (error: any) {
       console.error('[DB] Erro ao inicializar banco de dados:', error.message)
-      console.error('[DB] Stack:', error.stack)
       throw error
     }
   }

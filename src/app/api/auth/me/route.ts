@@ -3,7 +3,7 @@
  * Returns current session user. Never throws — always returns { user: null } on failure.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionUser } from '@/lib/auth'
+import { getSessionUser } from '@/lib/auth-adapter'
 
 export const dynamic = 'force-dynamic'
 
