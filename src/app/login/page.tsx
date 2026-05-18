@@ -34,10 +34,9 @@ function LoginPageInner() {
 
   const action = useAction({ timeoutMs: 30_000, retries: 1 })
 
-  // Determinar qual rota de autenticação usar baseado na variável de ambiente
-  const useSimpleAuth = process.env.NEXT_PUBLIC_USE_SIMPLE_AUTH === 'true'
-  const sendCodeRoute = useSimpleAuth ? '/api/auth/send-code-simple' : '/api/auth/send-code'
-  const verifyCodeRoute = useSimpleAuth ? '/api/auth/verify-code-simple' : '/api/auth/verify-code'
+  // Usar sempre as rotas principais (não-simple)
+  const sendCodeRoute = '/api/auth/send-code'
+  const verifyCodeRoute = '/api/auth/verify-code'
 
   // Handle after email verification link sent
   useEffect(() => {
